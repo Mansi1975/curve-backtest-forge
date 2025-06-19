@@ -52,33 +52,37 @@ const AboutSection = () => {
             <div>
               <h3 className="text-3xl font-bold text-white mb-6">Why Choose QuantEdge?</h3>
               <div className="space-y-4">
-                
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-gray-300">AI-powered strategy generation from natural language</span>
-                </div>
-                <div className="flex items-center space-x-3 bg-inherit">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-gray-300">Comprehensive Indian market data integration</span>
+                  <span className="text-gray-300">Real-time backtesting engine</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-white">Professional-grade performance analytics</span>
+                  <span className="text-gray-300">Advanced risk management tools</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  <span className="text-gray-300">No-code AI strategy builder</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  <span className="text-gray-300">Custom indicator development</span>
                 </div>
               </div>
             </div>
             <div className="relative">
               <div className="bg-gradient-to-br from-emerald-500/20 to-green-600/20 rounded-2xl p-8 backdrop-blur-sm">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-emerald-400 mb-2">Our Mission</div>
+                  <div className="text-4xl font-bold text-emerald-400 mb-2">15+ Years</div>
                   <div className="text-gray-300 mb-4 px-0">At QuantEdge we democratize quantitative trading my making sophisticated algorithmic strategies accessible to everyone. Our AI-Powered platform eliminates the complexity of coding while providing institutional -grade backtesting capabilities.</div>
-                  
-                  <div className="text-gray-300 mx-0 my-0 px-[2px] py-0">
+                  <div className="text-4xl font-bold text-emerald-400 mb-2">50K+</div>
+                  <div className="text-gray-300">institutional-grade backtesting capabilities.
 
-Real-time backtesting engine
-Advanced risk management tools
-No-code AI strategy builder
-Custom indicator development</div>
+AI-powered strategy generation from natural language
+
+Comprehensive Indian market data integration
+
+Professional-grade performance analytics</div>
                 </div>
               </div>
             </div>
