@@ -29,9 +29,7 @@ const AboutSection = () => {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             <span className="text-white">About </span>
-            <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
-              CurveBacktest
-            </span>
+            <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">QuantEdge</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             We're revolutionizing how traders test and optimize their strategies. Our platform combines 
