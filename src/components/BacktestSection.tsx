@@ -1,12 +1,9 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Play, Settings, Download, TrendingUp, DollarSign, Calendar, BarChart, Brain, Shield, Zap } from 'lucide-react';
-
 const BacktestSection = () => {
   const [selectedStrategy, setSelectedStrategy] = useState('momentum');
-  
   const strategies = [{
     id: 'momentum',
     name: 'Momentum Strategy',
@@ -29,27 +26,20 @@ const BacktestSection = () => {
     sharpe: '1.67',
     maxDrawdown: '-12.4%'
   }];
-
-  const startupFeatures = [
-    {
-      icon: Brain,
-      title: 'AI-Powered Analytics',
-      description: 'Advanced machine learning algorithms analyze market patterns and generate insights to optimize your trading strategies.'
-    },
-    {
-      icon: Shield,
-      title: 'Risk Management',
-      description: 'Comprehensive risk assessment tools including drawdown analysis, volatility metrics, and position sizing recommendations.'
-    },
-    {
-      icon: Zap,
-      title: 'Real-Time Processing',
-      description: 'Lightning-fast backtesting engine processes years of historical data in seconds with institutional-grade accuracy.'
-    }
-  ];
-
-  return (
-    <section id="backtest" className="relative py-24 bg-gray-900">
+  const startupFeatures = [{
+    icon: Brain,
+    title: 'AI-Powered Analytics',
+    description: 'Advanced machine learning algorithms analyze market patterns and generate insights to optimize your trading strategies.'
+  }, {
+    icon: Shield,
+    title: 'Risk Management',
+    description: 'Comprehensive risk assessment tools including drawdown analysis, volatility metrics, and position sizing recommendations.'
+  }, {
+    icon: Zap,
+    title: 'Real-Time Processing',
+    description: 'Lightning-fast backtesting engine processes years of historical data in seconds with institutional-grade accuracy.'
+  }];
+  return <section id="backtest" className="relative py-24 bg-gray-900">
       {/* Top curve */}
       <div className="absolute top-0 left-0 w-full">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-16 md:h-24 transform rotate-180">
@@ -100,113 +90,16 @@ const BacktestSection = () => {
 
         {/* Startup Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {startupFeatures.map((feature, index) => (
-            <Card key={index} className="p-8 bg-gray-800/50 border-gray-700 text-center hover:border-emerald-500/50 transition-all duration-300">
+          {startupFeatures.map((feature, index) => <Card key={index} className="p-8 bg-gray-800/50 border-gray-700 text-center hover:border-emerald-500/50 transition-all duration-300">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl mb-6">
                 <feature.icon className="text-white" size={32} />
               </div>
               <h4 className="text-xl font-bold text-white mb-4">{feature.title}</h4>
               <p className="text-gray-300 leading-relaxed">{feature.description}</p>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Strategy Selection */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-white mb-6">Choose Your Strategy</h3>
-            
-            <div className="space-y-4">
-              {strategies.map(strategy => (
-                <Card 
-                  key={strategy.id} 
-                  className={`p-6 cursor-pointer transition-all duration-300 hover:border-emerald-500/50 ${
-                    selectedStrategy === strategy.id 
-                      ? 'bg-emerald-900/30 border-emerald-500' 
-                      : 'bg-gray-800/50 border-gray-700'
-                  }`} 
-                  onClick={() => setSelectedStrategy(strategy.id)}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-lg font-semibold text-white">{strategy.name}</h4>
-                    <div className={`w-4 h-4 rounded-full border-2 ${
-                      selectedStrategy === strategy.id 
-                        ? 'bg-emerald-500 border-emerald-500' 
-                        : 'border-gray-400'
-                    }`}></div>
-                  </div>
-                  <p className="text-gray-300 mb-4">{strategy.description}</p>
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-emerald-400 font-bold">{strategy.returns}</div>
-                      <div className="text-xs text-gray-400">Returns</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-emerald-400 font-bold">{strategy.sharpe}</div>
-                      <div className="text-xs text-gray-400">Sharpe</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-red-400 font-bold">{strategy.maxDrawdown}</div>
-                      <div className="text-xs text-gray-400">Max DD</div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-
-            <div className="flex space-x-4">
-              <Button className="flex-1 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white">
-                <Play className="mr-2" size={16} />
-                Run Backtest
-              </Button>
-              <Button variant="outline" className="border-emerald-700 text-emerald-400 hover:bg-emerald-900/30">
-                <Settings className="mr-2" size={16} />
-                Settings
-              </Button>
-            </div>
-          </div>
-
-          {/* Results Dashboard */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-white mb-6">Backtest Results</h3>
-            
-            {/* Performance Metrics */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="p-6 bg-gray-800/50 border-gray-700">
-                <div className="flex items-center justify-between mb-2">
-                  <TrendingUp className="text-emerald-400" size={24} />
-                  <span className="text-2xl font-bold text-emerald-400">+24.7%</span>
-                </div>
-                <div className="text-gray-300">Total Return</div>
-              </Card>
-              
-              <Card className="p-6 bg-gray-800/50 border-gray-700">
-                <div className="flex items-center justify-between mb-2">
-                  <DollarSign className="text-green-400" size={24} />
-                  <span className="text-2xl font-bold text-green-400">$12,470</span>
-                </div>
-                <div className="text-gray-300">Total Profit</div>
-              </Card>
-              
-              <Card className="p-6 bg-gray-800/50 border-gray-700">
-                <div className="flex items-center justify-between mb-2">
-                  <Calendar className="text-blue-400" size={24} />
-                  <span className="text-2xl font-bold text-blue-400">247</span>
-                </div>
-                <div className="text-gray-300">Trading Days</div>
-              </Card>
-              
-              <Card className="p-6 bg-gray-800/50 border-gray-700">
-                <div className="flex items-center justify-between mb-2">
-                  <BarChart className="text-purple-400" size={24} />
-                  <span className="text-2xl font-bold text-purple-400">1.84</span>
-                </div>
-                <div className="text-gray-300">Sharpe Ratio</div>
-              </Card>
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       {/* Bottom curve */}
@@ -215,8 +108,6 @@ const BacktestSection = () => {
           <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-black"></path>
         </svg>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default BacktestSection;
