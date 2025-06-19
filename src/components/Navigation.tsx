@@ -1,10 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogIn } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,16 +20,30 @@ const Navigation = () => {
   }, []);
 
   const navItems = [
-    { name: 'Home', href: '#home' },
-    { name: 'About Us', href: '#about' },
-    { name: 'Backtest Strategy', href: '#backtest' },
-    { name: 'Contact Us', href: '#contact' },
+    { name: 'Home', href: '#home', route: '/' },
+    { name: 'About Us', href: '#about', route: '/' },
+    { name: 'Backtest Strategy', href: '/platform', route: '/platform' },
+    { name: 'Contact Us', href: '#contact', route: '/' },
   ];
 
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+  const handleNavigation = (item: typeof navItems[0]) => {
+    if (item.route === '/platform') {
+      navigate('/platform');
+    } else if (item.route === '/') {
+      if (location.pathname !== '/') {
+        navigate('/');
+        setTimeout(() => {
+          const element = document.querySelector(item.href);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+      } else {
+        const element = document.querySelector(item.href);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
     setIsMenuOpen(false);
   };
@@ -38,9 +55,12 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent">
+            <button
+              onClick={() => navigate('/')}
+              className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent"
+            >
               CurveBacktest
-            </h1>
+            </button>
           </div>
 
           {/* Desktop Navigation */}
@@ -49,12 +69,19 @@ const Navigation = () => {
               {navItems.map((item) => (
                 <button
                   key={item.name}
-                  onClick={() => scrollToSection(item.href)}
+                  onClick={() => handleNavigation(item)}
                   className="nav-link px-3 py-2 text-sm font-medium"
                 >
                   {item.name}
                 </button>
               ))}
+              <button
+                onClick={() => navigate('/login')}
+                className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-4 py-2 rounded-lg text-white transition-all duration-300"
+              >
+                <LogIn size={16} />
+                <span>Login</span>
+              </button>
             </div>
           </div>
 
@@ -76,12 +103,19 @@ const Navigation = () => {
               {navItems.map((item) => (
                 <button
                   key={item.name}
-                  onClick={() => scrollToSection(item.href)}
+                  onClick={() => handleNavigation(item)}
                   className="block px-3 py-2 text-base font-medium text-gray-300 hover:text-emerald-400 hover:bg-emerald-900/20 rounded-md transition-colors w-full text-left"
                 >
                   {item.name}
                 </button>
               ))}
+              <button
+                onClick={() => navigate('/login')}
+                className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-3 py-2 rounded-md text-white transition-all duration-300 w-full"
+              >
+                <LogIn size={16} />
+                <span>Login</span>
+              </button>
             </div>
           </div>
         )}
