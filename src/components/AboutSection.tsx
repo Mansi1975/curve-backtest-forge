@@ -50,9 +50,7 @@ const AboutSection = () => {
         <div className="bg-gradient-to-r from-emerald-900/30 to-green-900/30 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-emerald-700/30">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h3 className="text-3xl font-bold text-white mb-6">
-                Why Choose CurveBacktest?
-              </h3>
+              <h3 className="text-3xl font-bold text-white mb-6">Why Choose QuantEdge?</h3>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
