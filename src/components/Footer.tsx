@@ -1,20 +1,16 @@
-
 import { ArrowUp } from 'lucide-react';
-
 const Footer = () => {
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
-
-  return (
-    <footer className="relative bg-black text-white py-12">
+  return <footer className="relative bg-black text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back to Top Button */}
         <div className="text-center mb-8">
-          <button
-            onClick={scrollToTop}
-            className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-emerald-600 to-green-600 rounded-full hover:from-emerald-700 hover:to-green-700 transition-all duration-300 hover:scale-110"
-          >
+          <button onClick={scrollToTop} className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-emerald-600 to-green-600 rounded-full hover:from-emerald-700 hover:to-green-700 transition-all duration-300 hover:scale-110">
             <ArrowUp size={20} />
           </button>
         </div>
@@ -29,9 +25,7 @@ const Footer = () => {
               Empowering traders with advanced backtesting capabilities. 
               Test, optimize, and perfect your trading strategies with our institutional-grade platform.
             </p>
-            <div className="text-sm text-gray-400">
-              © 2024 QuantEdge. All rights reserved.
-            </div>
+            <div className="text-sm text-gray-400">© 2025 QuantEdge. All rights reserved.</div>
           </div>
 
           {/* Quick Links */}
@@ -64,8 +58,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
