@@ -67,7 +67,7 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">Call Us</h3>
-                  <p className="text-emerald-400">+1 (555) 123-4567</p>
+                  <p className="text-emerald-400">+918770678570</p>
                 </div>
               </div>
             </Card>
@@ -79,7 +79,7 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">Visit Us</h3>
-                  <p className="text-emerald-400">New York, NY 10001</p>
+                  <p className="text-emerald-400">FLAT.NO.204, KUBER HILL,B-WING, NR.JANAI SCHOOL,M TAL-KALYAN 421301</p>
                 </div>
               </div>
             </Card>

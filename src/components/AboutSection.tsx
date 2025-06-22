@@ -3,21 +3,21 @@ const AboutSection = () => {
   const features = [{
     icon: Shield,
     title: 'Secure & Reliable',
-    description: 'Bank-grade security with 99.9% uptime guarantee. Your data and strategies are protected with enterprise-level encryption.'
+    description: 'Experience back-grade security and a 99.9% uptime guarantee. Your data and trading strategies are safeguard with enterprise-level encryption, ensuring complete trust and performance'
   }, {
     icon: Zap,
     title: 'Lightning Fast',
-    description: 'Process thousands of backtests in seconds with our optimized algorithms and cloud infrastructure.'
+    description: 'Run thousands of backtests in seconds with our high-performance algorithms and scalable cloud infrastructure. Speed meets precision-so you can iterate, refine, and deploy faster than ever '
   }, {
     icon: Target,
     title: 'Precision Analytics',
-    description: 'Get detailed insights with advanced metrics, risk analysis, and performance attribution reporting.'
+    description: 'Gain a competitive edge with advanced metrics, comprehensive risk analysis, and detailed performance attribution reports-all designed to help you understand, evaluate, and refine every aspect of your strategy'
   }, {
     icon: Users,
     title: 'Community Driven',
-    description: 'Join a thriving community of traders sharing strategies, insights, and best practices.'
+    description: 'Join a vibrant network of traders exchanging strategies, insights, and best practices. Learn, collaborate, and gow along side like-minded professionals and enthusiasts'
   }];
-  return <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-900/20 via-green-900/10 to-black">
+  return <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-400/10 via-emerald-800/20 to-emerald-400/10">
       {/* Top curve */}
       <div className="absolute top-0 left-0 w-full">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-16 md:h-24 transform rotate-180">
