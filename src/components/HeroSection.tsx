@@ -1,13 +1,13 @@
 
-import { ArrowRight, TrendingUp, BarChart3 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
-  const scrollToBacktest = () => {
-    const element = document.querySelector('#backtest');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+  const navigate = useNavigate();
+
+  const handleStartBacktesting = () => {
+    navigate('/login');
   };
 
   return (
@@ -23,13 +23,6 @@ const HeroSection = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="animate-fade-in">
-          <div className="flex justify-center mb-8">
-            <div className="flex items-center space-x-4 bg-emerald-900/20 backdrop-blur-sm border border-emerald-700/30 rounded-full px-6 py-3">
-              <TrendingUp className="text-emerald-400" size={20} />
-              <span className="text-emerald-300 text-sm font-medium">Advanced Trading Analytics</span>
-            </div>
-          </div>
-
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             <span className="block text-white">Backtest Your</span>
             <span className="block bg-gradient-to-r from-emerald-400 via-green-500 to-emerald-600 bg-clip-text text-transparent">
@@ -44,21 +37,12 @@ const HeroSection = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button 
-              onClick={scrollToBacktest}
+              onClick={handleStartBacktesting}
               size="lg" 
               className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 animate-pulse-green"
             >
               Start Backtesting
               <ArrowRight className="ml-2" size={20} />
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-emerald-700 text-emerald-400 hover:bg-emerald-900/30 px-8 py-4 text-lg font-semibold rounded-full backdrop-blur-sm"
-            >
-              View Demo
-              <BarChart3 className="ml-2" size={20} />
             </Button>
           </div>
 

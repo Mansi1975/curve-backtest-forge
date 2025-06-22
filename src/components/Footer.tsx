@@ -23,14 +23,14 @@ const Footer = () => {
           {/* Company Info */}
           <div className="md:col-span-2">
             <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent mb-4">
-              CurveBacktest
+              QuantEdge
             </h3>
             <p className="text-gray-300 mb-4 max-w-md">
               Empowering traders with advanced backtesting capabilities. 
               Test, optimize, and perfect your trading strategies with our institutional-grade platform.
             </p>
             <div className="text-sm text-gray-400">
-              © 2024 CurveBacktest. All rights reserved.
+              © 2024 QuantEdge. All rights reserved.
             </div>
           </div>
 

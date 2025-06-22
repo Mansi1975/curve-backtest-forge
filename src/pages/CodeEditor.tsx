@@ -75,6 +75,10 @@ backtest_results = run_backtest(
     // Implement download functionality
   };
 
+  const handleBackToLogin = () => {
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -83,11 +87,11 @@ backtest_results = run_backtest(
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => navigate('/login')}
+                onClick={handleBackToLogin}
                 className="flex items-center space-x-2 text-gray-300 hover:text-emerald-400 transition-colors"
               >
                 <ArrowLeft size={20} />
-                <span>Back to Login</span>
+                <span>Back</span>
               </button>
               <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent">
                 QuantEdge

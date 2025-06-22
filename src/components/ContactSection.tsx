@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
-import { Mail, Phone, MapPin, Send, Twitter, Github, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Linkedin } from 'lucide-react';
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +17,7 @@ const ContactSection = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
+    // TODO: Store data in CSV file when backend is connected
     // Handle form submission here
   };
 
@@ -60,7 +61,7 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">Email Us</h3>
-                  <p className="text-emerald-400">support@curvebacktest.com</p>
+                  <p className="text-emerald-400">support@quantedge.com</p>
                 </div>
               </div>
             </Card>
@@ -89,14 +90,8 @@ const ContactSection = () => {
               </div>
             </Card>
 
-            {/* Social Links */}
+            {/* Social Links - Only LinkedIn */}
             <div className="flex space-x-4">
-              <a href="#" className="w-12 h-12 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-colors">
-                <Twitter className="text-white" size={20} />
-              </a>
-              <a href="#" className="w-12 h-12 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-colors">
-                <Github className="text-white" size={20} />
-              </a>
               <a href="#" className="w-12 h-12 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-colors">
                 <Linkedin className="text-white" size={20} />
               </a>

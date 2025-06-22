@@ -18,8 +18,13 @@ const Login = () => {
     e.preventDefault();
     // Here you would typically handle authentication
     console.log('Login attempt:', { email, password, isSignUp });
+    // TODO: Store user data in CSV file when backend is connected
     // For demo purposes, redirect to code editor
     navigate('/code-editor');
+  };
+
+  const handleBackToHome = () => {
+    navigate('/');
   };
 
   return (
@@ -31,7 +36,7 @@ const Login = () => {
 
       {/* Back button */}
       <button
-        onClick={() => navigate('/')}
+        onClick={handleBackToHome}
         className="absolute top-8 left-8 flex items-center space-x-2 text-gray-300 hover:text-emerald-400 transition-colors z-10"
       >
         <ArrowLeft size={20} />
