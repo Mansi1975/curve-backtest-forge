@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,6 +29,7 @@ import {
   Activity, 
   ArrowUpRight,
   ArrowDownRight,
+  ArrowLeft,
   Minus,
   Calendar,
   BarChart3
@@ -36,6 +37,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const Platform = () => {
+  const navigate = useNavigate();
   const [selectedTimeframe, setSelectedTimeframe] = useState('1Y');
   const [selectedStocks, setSelectedStocks] = useState(['AAPL', 'MSFT', 'GOOGL']);
 
@@ -152,11 +154,25 @@ const Platform = () => {
     return 'bg-red-600/30 text-red-300';
   };
 
+  const handleBackToCodeEditor = () => {
+    navigate('/code-editor');
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <div className="bg-gradient-to-br from-gray-900 to-black border-b border-emerald-900/20 pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center mb-6">
+            <button
+              onClick={handleBackToCodeEditor}
+              className="flex items-center space-x-2 text-gray-300 hover:text-emerald-400 transition-colors mr-6"
+            >
+              <ArrowLeft size={20} />
+              <span>Back to Code Editor</span>
+            </button>
+          </div>
+          
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">

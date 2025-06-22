@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Play, Settings, TrendingUp, Save, Download, Upload } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { ArrowLeft, Play, Settings, TrendingUp, Save, Download, Upload, Sparkles } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts';
 
 const CodeEditor = () => {
   const navigate = useNavigate();
@@ -33,14 +32,14 @@ backtest_results = run_backtest(
 
   const [isRunning, setIsRunning] = useState(false);
 
-  // Sample data for charts
+  // Sample data for live results
   const equityData = [
-    { date: 'Jan', value: 100000 },
-    { date: 'Feb', value: 105000 },
-    { date: 'Mar', value: 98000 },
-    { date: 'Apr', value: 112000 },
-    { date: 'May', value: 108000 },
-    { date: 'Jun', value: 125000 },
+    { date: 'Jan', value: 100000, benchmark: 100000 },
+    { date: 'Feb', value: 105000, benchmark: 102000 },
+    { date: 'Mar', value: 98000, benchmark: 104000 },
+    { date: 'Apr', value: 112000, benchmark: 103000 },
+    { date: 'May', value: 108000, benchmark: 108000 },
+    { date: 'Jun', value: 125000, benchmark: 109000 },
   ];
 
   const returnsData = [
@@ -51,13 +50,24 @@ backtest_results = run_backtest(
     { range: '5%', count: 3 },
   ];
 
+  const performanceMetrics = [
+    { metric: 'Total Return', value: '+25.7%' },
+    { metric: 'Sharpe Ratio', value: '1.84' },
+    { metric: 'Max Drawdown', value: '-8.2%' },
+    { metric: 'Win Rate', value: '68.2%' },
+  ];
+
   const handleRunStrategy = () => {
     setIsRunning(true);
-    // Simulate running strategy
     setTimeout(() => {
       setIsRunning(false);
       console.log('Strategy executed successfully');
     }, 2000);
+  };
+
+  const handleGenerateCode = () => {
+    console.log('Generating AI code...');
+    // Implement AI code generation
   };
 
   const handleSaveStrategy = () => {
@@ -173,9 +183,20 @@ backtest_results = run_backtest(
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="w-full h-full p-4 bg-gray-900 text-gray-100 font-mono text-sm resize-none focus:outline-none"
-                style={{ minHeight: '500px' }}
+                style={{ minHeight: '400px' }}
                 placeholder="Write your trading strategy here..."
               />
+            </div>
+
+            {/* Generate Button */}
+            <div className="mt-4">
+              <Button 
+                onClick={handleGenerateCode}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                <Sparkles className="mr-2" size={16} />
+                Generate Code with AI
+              </Button>
             </div>
 
             <div className="mt-4 p-3 bg-gray-900 rounded-lg border border-gray-600">
@@ -199,23 +220,43 @@ backtest_results = run_backtest(
             </div>
           </Card>
 
-          {/* Right Side - Graphs Simulator */}
+          {/* Right Side - Live Backtest Results */}
           <Card className="p-6 bg-gray-800/50 border-gray-700 flex flex-col">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">Live Results</h2>
+              <h2 className="text-xl font-bold text-white">Live Backtest Results</h2>
               <div className="flex items-center space-x-2 text-emerald-400">
                 <TrendingUp size={20} />
                 <span className="text-sm">+25.7% Returns</span>
               </div>
             </div>
 
-            <div className="flex-1 space-y-6">
+            <div className="flex-1 space-y-6 overflow-y-auto">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-2 gap-4">
+                {performanceMetrics.map((metric) => (
+                  <div key={metric.metric} className="bg-gray-900 rounded-lg p-4 text-center">
+                    <div className={`text-xl font-bold ${
+                      metric.value.includes('-') ? 'text-red-400' : 'text-emerald-400'
+                    }`}>
+                      {metric.value}
+                    </div>
+                    <div className="text-sm text-gray-400">{metric.metric}</div>
+                  </div>
+                ))}
+              </div>
+
               {/* Equity Curve */}
               <div>
                 <h3 className="text-lg font-semibold text-white mb-3">Equity Curve</h3>
                 <div className="h-48 bg-gray-900 rounded-lg p-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={equityData}>
+                    <AreaChart data={equityData}>
+                      <defs>
+                        <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                       <XAxis dataKey="date" stroke="#9CA3AF" />
                       <YAxis stroke="#9CA3AF" />
@@ -226,14 +267,22 @@ backtest_results = run_backtest(
                           borderRadius: '8px'
                         }}
                       />
-                      <Line 
+                      <Area 
                         type="monotone" 
                         dataKey="value" 
                         stroke="#10B981" 
                         strokeWidth={2}
-                        dot={{ fill: '#10B981', r: 4 }}
+                        fillOpacity={1}
+                        fill="url(#equityGradient)"
                       />
-                    </LineChart>
+                      <Line
+                        type="monotone"
+                        dataKey="benchmark"
+                        stroke="#6b7280"
+                        strokeWidth={1}
+                        strokeDasharray="5 5"
+                      />
+                    </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
@@ -257,18 +306,6 @@ backtest_results = run_backtest(
                       <Bar dataKey="count" fill="#10B981" />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-900 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-emerald-400">1.84</div>
-                  <div className="text-sm text-gray-400">Sharpe Ratio</div>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-red-400">-8.2%</div>
-                  <div className="text-sm text-gray-400">Max Drawdown</div>
                 </div>
               </div>
             </div>
