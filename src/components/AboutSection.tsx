@@ -1,6 +1,4 @@
-
 import { Shield, Zap, Target, Users } from 'lucide-react';
-
 const AboutSection = () => {
   const features = [{
     icon: Shield,
@@ -19,9 +17,7 @@ const AboutSection = () => {
     title: 'Community Driven',
     description: 'Join a thriving community of traders sharing strategies, insights, and best practices.'
   }];
-
-  return (
-    <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-900/20 via-green-900/10 to-black">
+  return <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-900/20 via-green-900/10 to-black">
       {/* Top curve */}
       <div className="absolute top-0 left-0 w-full">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-16 md:h-24 transform rotate-180">
@@ -35,10 +31,7 @@ const AboutSection = () => {
             <span className="text-white">About </span>
             <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">QuantEdge</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            We're revolutionizing how traders test and optimize their strategies. Our platform combines 
-            cutting-edge technology with intuitive design to deliver unparalleled backtesting capabilities.
-          </p>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">We're transforming the way traders develop and refine their strategies-delivering unmatched backtesting power through a seamless blend of advanced technology and intutive design</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
@@ -100,8 +93,6 @@ Professional-grade performance analytics</div>
           <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" className="fill-black"></path>
         </svg>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default AboutSection;
