@@ -55,9 +55,7 @@ const BacktestSection = () => {
             </span>
             <span className="text-white"> Your Strategy</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
-            Test your strategies with historical data and get institutional-grade performance analytics.
-          </p>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">Simulate your trading strategies on historical data and access enterprise-level perf</p>
           
           {/* Trading Platform Info */}
           <div className="bg-gradient-to-r from-emerald-900/20 to-green-900/20 rounded-2xl p-8 backdrop-blur-sm border border-emerald-700/30 mb-12">
