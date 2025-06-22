@@ -1,17 +1,12 @@
-
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-
 const HeroSection = () => {
   const navigate = useNavigate();
-
   const handleStartBacktesting = () => {
     navigate('/login');
   };
-
-  return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+  return <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background with gradient */}
       <div className="absolute inset-0 bg-hero-gradient"></div>
       
@@ -30,17 +25,12 @@ const HeroSection = () => {
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Unlock the power of data-driven trading with our advanced backtesting platform. 
-            Test, optimize, and perfect your strategies with institutional-grade analytics.
-          </p>
+          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">Unlock the Power of Data-Driven Trading  
+Our advanced backtesting platform lets you test, optimise, and
+refine your trading strategies using institutional-grade analytics</p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Button 
-              onClick={handleStartBacktesting}
-              size="lg" 
-              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 animate-pulse-green"
-            >
+            <Button onClick={handleStartBacktesting} size="lg" className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 animate-pulse-green">
               Start Backtesting
               <ArrowRight className="ml-2" size={20} />
             </Button>
@@ -70,8 +60,6 @@ const HeroSection = () => {
           <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-black"></path>
         </svg>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
