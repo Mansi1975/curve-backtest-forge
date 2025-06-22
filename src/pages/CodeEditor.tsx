@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Play, Settings, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Play, Settings, TrendingUp, Save, Download, Upload } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 const CodeEditor = () => {
@@ -31,6 +31,8 @@ backtest_results = run_backtest(
     initial_capital=100000
 )`);
 
+  const [isRunning, setIsRunning] = useState(false);
+
   // Sample data for charts
   const equityData = [
     { date: 'Jan', value: 100000 },
@@ -49,6 +51,30 @@ backtest_results = run_backtest(
     { range: '5%', count: 3 },
   ];
 
+  const handleRunStrategy = () => {
+    setIsRunning(true);
+    // Simulate running strategy
+    setTimeout(() => {
+      setIsRunning(false);
+      console.log('Strategy executed successfully');
+    }, 2000);
+  };
+
+  const handleSaveStrategy = () => {
+    console.log('Strategy saved');
+    // Implement save functionality
+  };
+
+  const handleLoadStrategy = () => {
+    console.log('Loading strategy...');
+    // Implement load functionality
+  };
+
+  const handleDownloadResults = () => {
+    console.log('Downloading results...');
+    // Implement download functionality
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -61,16 +87,39 @@ backtest_results = run_backtest(
                 className="flex items-center space-x-2 text-gray-300 hover:text-emerald-400 transition-colors"
               >
                 <ArrowLeft size={20} />
-                <span>Back</span>
+                <span>Back to Login</span>
               </button>
               <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent">
                 QuantEdge
               </div>
+              <span className="text-sm text-gray-400">Strategy Simulator</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button className="bg-emerald-600 hover:bg-emerald-700">
+            <div className="flex items-center space-x-2">
+              <Button 
+                onClick={handleSaveStrategy}
+                variant="outline" 
+                size="sm" 
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                <Save className="mr-2" size={16} />
+                Save
+              </Button>
+              <Button 
+                onClick={handleLoadStrategy}
+                variant="outline" 
+                size="sm" 
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                <Upload className="mr-2" size={16} />
+                Load
+              </Button>
+              <Button 
+                onClick={handleRunStrategy}
+                disabled={isRunning}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
                 <Play className="mr-2" size={16} />
-                Run Strategy
+                {isRunning ? 'Running...' : 'Run Strategy'}
               </Button>
               <Button 
                 onClick={() => navigate('/platform')}
@@ -97,11 +146,23 @@ backtest_results = run_backtest(
             </div>
             
             <div className="flex-1 bg-gray-900 rounded-lg border border-gray-600 overflow-hidden">
-              <div className="bg-gray-800 px-4 py-2 border-b border-gray-600 flex items-center space-x-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="ml-4 text-sm text-gray-400">strategy.py</span>
+              <div className="bg-gray-800 px-4 py-2 border-b border-gray-600 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="ml-4 text-sm text-gray-400">strategy.py</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    onClick={handleDownloadResults}
+                    variant="ghost" 
+                    size="sm"
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <Download size={14} />
+                  </Button>
+                </div>
               </div>
               
               <textarea
@@ -116,10 +177,20 @@ backtest_results = run_backtest(
             <div className="mt-4 p-3 bg-gray-900 rounded-lg border border-gray-600">
               <div className="text-sm text-gray-400 mb-2">Console Output:</div>
               <div className="text-green-400 font-mono text-xs">
-                → Strategy compiled successfully<br/>
-                → Backtest period: 2023-01-01 to 2024-01-01<br/>
-                → Total returns: +25.7%<br/>
-                → Sharpe ratio: 1.84
+                {isRunning ? (
+                  <>
+                    → Strategy compiling...<br/>
+                    → Running backtest...<br/>
+                    → Processing data...
+                  </>
+                ) : (
+                  <>
+                    → Strategy compiled successfully<br/>
+                    → Backtest period: 2023-01-01 to 2024-01-01<br/>
+                    → Total returns: +25.7%<br/>
+                    → Sharpe ratio: 1.84
+                  </>
+                )}
               </div>
             </div>
           </Card>
