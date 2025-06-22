@@ -48,7 +48,7 @@ refine your trading strategies using institutional-grade analytics</p>
             </div>
             <div className="glass-effect rounded-2xl p-6 text-center">
               <div className="text-3xl font-bold text-emerald-400 mb-2">₹100K+</div>
-              <div className="text-gray-300">Active Traders</div>
+              <div className="text-gray-300">Investments</div>
             </div>
           </div>
         </div>
