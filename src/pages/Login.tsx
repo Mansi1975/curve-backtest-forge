@@ -18,8 +18,8 @@ const Login = () => {
     e.preventDefault();
     // Here you would typically handle authentication
     console.log('Login attempt:', { email, password, isSignUp });
-    // For demo purposes, redirect to platform
-    navigate('/platform');
+    // For demo purposes, redirect to code editor
+    navigate('/code-editor');
   };
 
   return (
@@ -41,7 +41,7 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-md mx-auto px-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent mb-2">
-            CurveBacktest
+            QuantEdge
           </h1>
           <p className="text-gray-300">
             {isSignUp ? 'Create your account' : 'Welcome back'}
