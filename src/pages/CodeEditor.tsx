@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Play, Settings, TrendingUp, Save, Download, Upload, Sparkles } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ArrowLeft, Play, Settings, TrendingUp, Save, Download, Upload, Sparkles, DollarSign, Target, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const CodeEditor = () => {
   const navigate = useNavigate();
@@ -31,15 +34,22 @@ backtest_results = run_backtest(
 )`);
 
   const [isRunning, setIsRunning] = useState(false);
+  const [selectedAnalytic, setSelectedAnalytic] = useState('histogram');
 
   // Sample data for live results
   const equityData = [
-    { date: 'Jan', value: 100000, benchmark: 100000 },
-    { date: 'Feb', value: 105000, benchmark: 102000 },
-    { date: 'Mar', value: 98000, benchmark: 104000 },
-    { date: 'Apr', value: 112000, benchmark: 103000 },
-    { date: 'May', value: 108000, benchmark: 108000 },
-    { date: 'Jun', value: 125000, benchmark: 109000 },
+    { date: 'Jan', value: 100000, benchmark: 100000, drawdown: 0 },
+    { date: 'Feb', value: 105000, benchmark: 102000, drawdown: 0 },
+    { date: 'Mar', value: 112000, benchmark: 104000, drawdown: 0 },
+    { date: 'Apr', value: 108000, benchmark: 103000, drawdown: -3.6 },
+    { date: 'May', value: 121000, benchmark: 108000, drawdown: 0 },
+    { date: 'Jun', value: 119000, benchmark: 109000, drawdown: -1.7 },
+    { date: 'Jul', value: 128000, benchmark: 111000, drawdown: 0 },
+    { date: 'Aug', value: 124000, benchmark: 110000, drawdown: -3.1 },
+    { date: 'Sep', value: 132000, benchmark: 113000, drawdown: 0 },
+    { date: 'Oct', value: 129000, benchmark: 112000, drawdown: -2.3 },
+    { date: 'Nov', value: 138000, benchmark: 115000, drawdown: 0 },
+    { date: 'Dec', value: 142000, benchmark: 118000, drawdown: 0 },
   ];
 
   const returnsData = [
@@ -50,12 +60,53 @@ backtest_results = run_backtest(
     { range: '5%', count: 3 },
   ];
 
-  const performanceMetrics = [
-    { metric: 'Total Return', value: '+25.7%' },
-    { metric: 'Sharpe Ratio', value: '1.84' },
-    { metric: 'Max Drawdown', value: '-8.2%' },
-    { metric: 'Win Rate', value: '68.2%' },
+  const stockData = {
+    AAPL: [
+      { date: 'Jan', value: 10000, position: null },
+      { date: 'Feb', value: 10500, position: 'buy' },
+      { date: 'Mar', value: 11200, position: null },
+      { date: 'Apr', value: 10800, position: null },
+      { date: 'May', value: 12100, position: 'sell' },
+      { date: 'Jun', value: 11900, position: null },
+    ],
+    MSFT: [
+      { date: 'Jan', value: 8000, position: null },
+      { date: 'Feb', value: 8200, position: 'buy' },
+      { date: 'Mar', value: 8800, position: null },
+      { date: 'Apr', value: 8500, position: null },
+      { date: 'May', value: 9200, position: null },
+      { date: 'Jun', value: 9100, position: 'sell' },
+    ],
+  };
+
+  const monthlyPnL = [
+    { year: 2023, Jan: 2.5, Feb: -0.8, Mar: 4.2, Apr: -1.5, May: 3.8, Jun: -0.3, Jul: 5.1, Aug: -2.1, Sep: 3.6, Oct: -1.2, Nov: 4.5, Dec: 2.8 },
+    { year: 2024, Jan: 3.2, Feb: 1.8, Mar: -2.3, Apr: 4.6, May: -0.9, Jun: 2.1, Jul: 3.7, Aug: -1.6, Sep: 5.2, Oct: -0.7, Nov: 3.9, Dec: 2.4 },
   ];
+
+  const performanceMetrics = [
+    { metric: 'Max Profit', value: '₹15,420', description: 'Largest single trade gain' },
+    { metric: 'Max Loss', value: '₹-8,340', description: 'Largest single trade loss' },
+    { metric: 'Average Return', value: '2.3%', description: 'Average return per trade' },
+    { metric: 'Sharpe Ratio', value: '2.14', description: 'Risk-adjusted return measure' },
+    { metric: 'CAGR', value: '18.5%', description: 'Compound Annual Growth Rate' },
+    { metric: 'Win Rate', value: '68.2%', description: 'Percentage of profitable trades' },
+  ];
+
+  const getPositionColor = (position: string | null) => {
+    if (position === 'buy') return '#10b981';
+    if (position === 'sell') return '#ef4444';
+    return 'transparent';
+  };
+
+  const getPnLCellColor = (value: number) => {
+    if (value > 3) return 'bg-green-600/30 text-green-300';
+    if (value > 1) return 'bg-green-500/20 text-green-400';
+    if (value > 0) return 'bg-green-400/10 text-green-500';
+    if (value > -1) return 'bg-red-400/10 text-red-500';
+    if (value > -2) return 'bg-red-500/20 text-red-400';
+    return 'bg-red-600/30 text-red-300';
+  };
 
   const handleRunStrategy = () => {
     setIsRunning(true);
@@ -67,26 +118,120 @@ backtest_results = run_backtest(
 
   const handleGenerateCode = () => {
     console.log('Generating AI code...');
-    // Implement AI code generation
   };
 
   const handleSaveStrategy = () => {
     console.log('Strategy saved');
-    // Implement save functionality
   };
 
   const handleLoadStrategy = () => {
     console.log('Loading strategy...');
-    // Implement load functionality
   };
 
   const handleDownloadResults = () => {
     console.log('Downloading results...');
-    // Implement download functionality
   };
 
   const handleBackToLogin = () => {
     navigate('/login');
+  };
+
+  const renderSelectedAnalytic = () => {
+    switch (selectedAnalytic) {
+      case 'histogram':
+        return (
+          <div className="h-64 bg-gray-900 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-white mb-3">Returns Histogram</h4>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={returnsData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="range" stroke="#9CA3AF" />
+                <YAxis stroke="#9CA3AF" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1F2937', 
+                    border: '1px solid #374151',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Bar dataKey="count" fill="#10B981" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        );
+      
+      case 'monthly-pnl':
+        return (
+          <div className="h-64 bg-gray-900 rounded-lg p-4 overflow-x-auto">
+            <h4 className="text-sm font-medium text-white mb-3">Monthly P&L Heatmap</h4>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-gray-300 text-xs">Year</TableHead>
+                  <TableHead className="text-gray-300 text-xs">Jan</TableHead>
+                  <TableHead className="text-gray-300 text-xs">Feb</TableHead>
+                  <TableHead className="text-gray-300 text-xs">Mar</TableHead>
+                  <TableHead className="text-gray-300 text-xs">Apr</TableHead>
+                  <TableHead className="text-gray-300 text-xs">May</TableHead>
+                  <TableHead className="text-gray-300 text-xs">Jun</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {monthlyPnL.map((yearData) => (
+                  <TableRow key={yearData.year}>
+                    <TableCell className="font-medium text-white text-xs">{yearData.year}</TableCell>
+                    <TableCell className={`text-center font-medium text-xs ${getPnLCellColor(yearData.Jan)}`}>
+                      {yearData.Jan > 0 ? '+' : ''}{yearData.Jan}%
+                    </TableCell>
+                    <TableCell className={`text-center font-medium text-xs ${getPnLCellColor(yearData.Feb)}`}>
+                      {yearData.Feb > 0 ? '+' : ''}{yearData.Feb}%
+                    </TableCell>
+                    <TableCell className={`text-center font-medium text-xs ${getPnLCellColor(yearData.Mar)}`}>
+                      {yearData.Mar > 0 ? '+' : ''}{yearData.Mar}%
+                    </TableCell>
+                    <TableCell className={`text-center font-medium text-xs ${getPnLCellColor(yearData.Apr)}`}>
+                      {yearData.Apr > 0 ? '+' : ''}{yearData.Apr}%
+                    </TableCell>
+                    <TableCell className={`text-center font-medium text-xs ${getPnLCellColor(yearData.May)}`}>
+                      {yearData.May > 0 ? '+' : ''}{yearData.May}%
+                    </TableCell>
+                    <TableCell className={`text-center font-medium text-xs ${getPnLCellColor(yearData.Jun)}`}>
+                      {yearData.Jun > 0 ? '+' : ''}{yearData.Jun}%
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        );
+      
+      case 'performance-metrics':
+        return (
+          <div className="h-64 bg-gray-900 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-white mb-3">Performance Metrics</h4>
+            <div className="grid grid-cols-2 gap-3 h-full overflow-y-auto">
+              {performanceMetrics.map((metric) => (
+                <div key={metric.metric} className="p-2 bg-gray-700/30 rounded border border-gray-600">
+                  <div className="flex justify-between items-center mb-1">
+                    <h5 className="text-xs font-medium text-gray-300">{metric.metric}</h5>
+                    <span className={`text-sm font-bold ${
+                      metric.value.includes('-') ? 'text-red-400' : 
+                      metric.value.includes('+') || parseFloat(metric.value) > 0 ? 'text-green-400' : 
+                      'text-white'
+                    }`}>
+                      {metric.value}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">{metric.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
   };
 
   return (
@@ -220,94 +365,211 @@ backtest_results = run_backtest(
             </div>
           </Card>
 
-          {/* Right Side - Live Backtest Results */}
+          {/* Right Side - Live Results */}
           <Card className="p-6 bg-gray-800/50 border-gray-700 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Live Backtest Results</h2>
               <div className="flex items-center space-x-2 text-emerald-400">
                 <TrendingUp size={20} />
-                <span className="text-sm">+25.7% Returns</span>
+                <span className="text-sm">+42.3% Returns</span>
               </div>
             </div>
 
-            <div className="flex-1 space-y-6 overflow-y-auto">
-              {/* Key Metrics */}
-              <div className="grid grid-cols-2 gap-4">
-                {performanceMetrics.map((metric) => (
-                  <div key={metric.metric} className="bg-gray-900 rounded-lg p-4 text-center">
-                    <div className={`text-xl font-bold ${
-                      metric.value.includes('-') ? 'text-red-400' : 'text-emerald-400'
-                    }`}>
-                      {metric.value}
-                    </div>
-                    <div className="text-sm text-gray-400">{metric.metric}</div>
+            {/* Key Metrics at Top */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-gray-900 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-400">Total Return</span>
+                  <TrendingUp className="text-emerald-400" size={16} />
+                </div>
+                <div className="text-lg font-bold text-emerald-400">+42.3%</div>
+              </div>
+              <div className="bg-gray-900 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-400">Portfolio Value</span>
+                  <DollarSign className="text-green-400" size={16} />
+                </div>
+                <div className="text-lg font-bold text-white">₹1,42,470</div>
+              </div>
+              <div className="bg-gray-900 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-400">Sharpe Ratio</span>
+                  <Target className="text-blue-400" size={16} />
+                </div>
+                <div className="text-lg font-bold text-blue-400">2.14</div>
+              </div>
+              <div className="bg-gray-900 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-400">Max Drawdown</span>
+                  <Activity className="text-red-400" size={16} />
+                </div>
+                <div className="text-lg font-bold text-red-400">-8.4%</div>
+              </div>
+            </div>
+
+            {/* Scrollable Charts Section */}
+            <div className="flex-1 mb-4">
+              <ScrollArea className="h-full">
+                <div className="space-y-4 pr-4">
+                  {/* Equity Curve */}
+                  <div className="h-48 bg-gray-900 rounded-lg p-4">
+                    <h3 className="text-sm font-semibold text-white mb-3">Equity Curve</h3>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={equityData}>
+                        <defs>
+                          <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="date" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#10B981" 
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#equityGradient)"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="benchmark"
+                          stroke="#6b7280"
+                          strokeWidth={1}
+                          strokeDasharray="5 5"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
-                ))}
-              </div>
 
-              {/* Equity Curve */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-3">Equity Curve</h3>
-                <div className="h-48 bg-gray-900 rounded-lg p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={equityData}>
-                      <defs>
-                        <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="date" stroke="#9CA3AF" />
-                      <YAxis stroke="#9CA3AF" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937', 
-                          border: '1px solid #374151',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="#10B981" 
-                        strokeWidth={2}
-                        fillOpacity={1}
-                        fill="url(#equityGradient)"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="benchmark"
-                        stroke="#6b7280"
-                        strokeWidth={1}
-                        strokeDasharray="5 5"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
+                  {/* Drawdown Curve */}
+                  <div className="h-48 bg-gray-900 rounded-lg p-4">
+                    <h3 className="text-sm font-semibold text-white mb-3">Drawdown Curve</h3>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={equityData}>
+                        <defs>
+                          <linearGradient id="drawdownGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="date" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="drawdown"
+                          stroke="#ef4444"
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#drawdownGradient)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
 
-              {/* Returns Distribution */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-3">Returns Distribution</h3>
-                <div className="h-48 bg-gray-900 rounded-lg p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={returnsData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="range" stroke="#9CA3AF" />
-                      <YAxis stroke="#9CA3AF" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937', 
-                          border: '1px solid #374151',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Bar dataKey="count" fill="#10B981" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {/* Individual Stock Performance */}
+                  <div className="h-48 bg-gray-900 rounded-lg p-4">
+                    <h3 className="text-sm font-semibold text-white mb-3">Individual Stock Performance</h3>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="date" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          data={stockData.AAPL}
+                          stroke="#10b981"
+                          strokeWidth={2}
+                          name="AAPL"
+                          dot={(props: any) => {
+                            const position = stockData.AAPL[props.index]?.position;
+                            return position ? (
+                              <circle
+                                key={props.index}
+                                cx={props.cx}
+                                cy={props.cy}
+                                r={4}
+                                fill={getPositionColor(position)}
+                                stroke="#fff"
+                                strokeWidth={1}
+                              />
+                            ) : null;
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          data={stockData.MSFT}
+                          stroke="#3b82f6"
+                          strokeWidth={2}
+                          name="MSFT"
+                          dot={(props: any) => {
+                            const position = stockData.MSFT[props.index]?.position;
+                            return position ? (
+                              <circle
+                                key={props.index}
+                                cx={props.cx}
+                                cy={props.cy}
+                                r={4}
+                                fill={getPositionColor(position)}
+                                stroke="#fff"
+                                strokeWidth={1}
+                              />
+                            ) : null;
+                          }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-              </div>
+              </ScrollArea>
+            </div>
+
+            {/* Analytics Dropdown and Selected View */}
+            <div className="space-y-3">
+              <Select value={selectedAnalytic} onValueChange={setSelectedAnalytic}>
+                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                  <SelectValue placeholder="Select Analytics" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-700 border-gray-600">
+                  <SelectItem value="histogram" className="text-white hover:bg-gray-600">
+                    Returns Histogram
+                  </SelectItem>
+                  <SelectItem value="monthly-pnl" className="text-white hover:bg-gray-600">
+                    Monthly P&L
+                  </SelectItem>
+                  <SelectItem value="performance-metrics" className="text-white hover:bg-gray-600">
+                    Performance Metrics
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {renderSelectedAnalytic()}
             </div>
           </Card>
         </div>
