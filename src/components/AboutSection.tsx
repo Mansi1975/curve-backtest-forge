@@ -17,7 +17,7 @@ const AboutSection = () => {
     title: 'Community Driven',
     description: 'Join a vibrant network of traders exchanging strategies, insights, and best practices. Learn, collaborate, and gow along side like-minded professionals and enthusiasts'
   }];
-  return <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-400/10 via-emerald-800/20 to-emerald-400/10">
+  return <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-400/60 via-emerald-800/20 to-emerald-400/60">
       {/* Top curve */}
       <div className="absolute top-0 left-0 w-full">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-16 md:h-24 transform rotate-180">
