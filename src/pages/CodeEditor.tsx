@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Play, Settings, TrendingUp, Save, Download, Upload, Sparkles, DollarSign, Target, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import SettingsForm from '@/components/SettingsForm';
+
 
 const CodeEditor = () => {
   const navigate = useNavigate();
@@ -32,9 +34,52 @@ backtest_results = run_backtest(
     end_date="2024-01-01",
     initial_capital=100000
 )`);
+interface Settings {
+  longEntry: string;
+  longExit: string;
+  shortEntry: string;
+  shortExit: string;
+  asset: number;
+  target: number;
+  commission: number;
+  initialInvestment: number;
+  timeFrame: number;
+  selectedStocks: string[];
+}
+  const [savedStrategies, setSavedStrategies] = useState<any[]>([]);
+  const [showSavedList, setShowSavedList] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [selectedAnalytic, setSelectedAnalytic] = useState('histogram');
+  const [showSettings, setShowSettings] = useState(false);
+ const [settings, setSettings] = useState<Settings>({
+  longEntry: '',
+  longExit: '',
+  shortEntry: '',
+  shortExit: '',
+  asset: 0,
+  target: 0,
+  commission: 0,
+  initialInvestment: 0,
+  timeFrame: 0,
+  selectedStocks: [],
+});
+
+
+useEffect(() => {
+  const stored = localStorage.getItem('simulationSettings');
+  if (stored) {
+    try {
+      setSettings(JSON.parse(stored));
+    } catch (e) {
+      console.error('Invalid stored settings');
+    }
+  }
+}, []);
+
+
+
 
   // Sample data for live results
   const equityData = [
@@ -108,29 +153,106 @@ backtest_results = run_backtest(
     return 'bg-red-600/30 text-red-300';
   };
 
+  // const handleRunStrategy = () => {
+  //   setIsRunning(true);
+  //   setTimeout(() => {
+  //     setIsRunning(false);
+  //     console.log('Strategy executed successfully');
+  //   }, 2000);
+  // };
   const handleRunStrategy = () => {
-    setIsRunning(true);
-    setTimeout(() => {
-      setIsRunning(false);
-      console.log('Strategy executed successfully');
-    }, 2000);
-  };
+  setIsRunning(true);
+  setError(null); // Clear previous errors
+  // setTimeout(() => {
+  //   const hasError = code.includes('syntax_error'); // Dummy condition
+  //   setIsRunning(false);
+  //   if (hasError) {
+  //     setError('SyntaxError: Unexpected indent on line 10\nCheck indentation or invalid characters.');
+  //   } else {
+  //     console.log('Strategy executed successfully');
+  //   }
+  // }, 1000);
+  setTimeout(() => {
+  const hasError = code.includes('syntax_error'); // Dummy error check
+  setIsRunning(false);
+  if (hasError) {
+    setError('SyntaxError: Unexpected indent on line 10\nCheck indentation or invalid characters.');
+  } else {
+    console.log('Strategy executed successfully');
+    console.log('Using settings:', settings);
+    console.log('Strategy code:', code);
+    // Here you can call backend API to run actual backtest
+  }
+}, 1000);
+
+};
+
 
   const handleGenerateCode = () => {
     console.log('Generating AI code...');
   };
 
   const handleSaveStrategy = () => {
-    console.log('Strategy saved');
+  const name = prompt("Enter strategy name:");
+  if (!name) return;
+
+  const saved = JSON.parse(localStorage.getItem("savedStrategies") || "[]");
+  const newEntry = {
+    id: Date.now(),
+    name,
+    code,
+    timestamp: new Date().toISOString(),
   };
+
+  const updated = [newEntry, ...saved];
+  localStorage.setItem("savedStrategies", JSON.stringify(updated));
+  setSavedStrategies(updated);
+  console.log("Strategy saved");
+};
+   const handleShowSaved = () => {
+  const saved = JSON.parse(localStorage.getItem("savedStrategies") || "[]");
+  setSavedStrategies(saved);
+  setShowSavedList(true);
+};
+
+const handleLoadSubmission = (submissionCode: string) => {
+  setCode(submissionCode);
+  setShowSavedList(false);
+};
+
+const handleDeleteSubmission = (id: number) => {
+  const updated = savedStrategies.filter((s) => s.id !== id);
+  localStorage.setItem("savedStrategies", JSON.stringify(updated));
+  setSavedStrategies(updated);
+};
+
+
 
   const handleLoadStrategy = () => {
-    console.log('Loading strategy...');
+    const saved = localStorage.getItem("savedStrategy");
+    if (saved) setCode(saved);
+    console.log("Strategy loaded from localStorage");
   };
 
-  const handleDownloadResults = () => {
-    console.log('Downloading results...');
-  };
+ const handleDownloadCode = () => {
+  const userFilename = prompt('Enter filename (without extension):', 'strategy');
+  if (!userFilename) return; // Cancelled
+
+  const today = new Date();
+  const formattedDate = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  const finalFilename = `${userFilename}_${formattedDate}.py`;
+
+  const blob = new Blob([code], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = finalFilename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
 
   const handleBackToLogin = () => {
     navigate('/login');
@@ -234,8 +356,18 @@ backtest_results = run_backtest(
     }
   };
 
+ 
+
+
   return (
     <div className="min-h-screen bg-black text-white">
+       {showSettings && (
+  <SettingsForm
+    settings={settings}
+    setSettings={setSettings}
+    onClose={() => setShowSettings(false)}
+  />
+)}
       {/* Header */}
       <div className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -248,63 +380,66 @@ backtest_results = run_backtest(
                 <ArrowLeft size={20} />
                 <span>Back</span>
               </button>
-              <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent">
-                QuantEdge
+              <div className="flex items-center space-x-2">
+                <img src="/logo.png" alt="Logo" className="h-9 w-9 rounded-none" />
+                <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent">
+                  QuantEdge
+                </div>
               </div>
+
               <span className="text-sm text-gray-400">Strategy Simulator</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Button 
-                onClick={handleSaveStrategy}
-                variant="outline" 
-                size="sm" 
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
-              >
-                <Save className="mr-2" size={16} />
-                Save
-              </Button>
-              <Button 
-                onClick={handleLoadStrategy}
-                variant="outline" 
-                size="sm" 
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
-              >
-                <Upload className="mr-2" size={16} />
-                Load
-              </Button>
-              <Button 
-                onClick={handleRunStrategy}
-                disabled={isRunning}
-                className="bg-emerald-600 hover:bg-emerald-700"
-              >
-                <Play className="mr-2" size={16} />
-                {isRunning ? 'Running...' : 'Run Strategy'}
-              </Button>
+             <Button 
+  onClick={handleShowSaved}
+  variant="outline" 
+  size="sm" 
+  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+>
+  Submissions
+</Button>
+
+             
+              
               <Button 
                 onClick={() => navigate('/platform')}
                 className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700"
               >
-                Advanced Platform
+                Advanced Results 
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-120px)]">
+
+        {/* <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)]"> */}
+        <div className="flex flex-col lg:flex-row h-[calc(100vh-120px)] relative">
+        {/* <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] relative bg-[#0f0f0f]"> */}
+
           {/* Left Side - Code Editor */}
-          <Card className="p-6 bg-gray-800/50 border-gray-700 flex flex-col">
+          <Card className="w-full lg:w-1/2 p-6 pb-[70px] bg-gray-800/50 rounded-none border-gray-700 flex flex-col overflow-hidden h-full">
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Strategy Code Editor</h2>
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+                {/* <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-700">
                   <Settings size={16} />
-                </Button>
+                </Button> */}
+                <Button
+  variant="outline"
+  size="sm"
+  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+  onClick={() => setShowSettings(!showSettings)}
+>
+  <Settings size={16} />
+</Button>
+
               </div>
             </div>
             
-            <div className="flex-1 bg-gray-900 rounded-lg border border-gray-600 overflow-hidden">
+            {/* <div className="flex-1 bg-gray-900 rounded-lg border border-gray-600 overflow-hidden"> */}
+            <div className={`flex-1 bg-gray-900 rounded-lg border border-gray-600 overflow-hidden transition-all duration-300 ${error ? 'mb-4' : 'mb-0'}`}>
               <div className="bg-gray-800 px-4 py-2 border-b border-gray-600 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -314,7 +449,7 @@ backtest_results = run_backtest(
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button 
-                    onClick={handleDownloadResults}
+                    onClick={handleDownloadCode}
                     variant="ghost" 
                     size="sm"
                     className="text-gray-400 hover:text-white"
@@ -331,20 +466,93 @@ backtest_results = run_backtest(
                 style={{ minHeight: '400px' }}
                 placeholder="Write your trading strategy here..."
               />
+              {showSavedList && (
+  <div className="absolute top-20 left-1/2 transform -translate-x-1/2 w-[90%] max-w-3xl bg-gray-900 border border-gray-700 rounded-lg p-4 z-50 shadow-xl">
+    <h3 className="text-lg font-bold text-white mb-4">📋 Your Submissions</h3>
+    
+    {savedStrategies.length === 0 ? (
+      <p className="text-gray-400">No submissions yet.</p>
+    ) : (
+      <table className="w-full text-sm text-left text-gray-300">
+        <thead>
+          <tr className="border-b border-gray-700 text-gray-400">
+            <th className="py-2">Name</th>
+            <th>Saved At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {savedStrategies.map((s) => (
+            <tr key={s.id} className="border-b border-gray-800 hover:bg-gray-800">
+              <td className="py-2">{s.name}</td>
+              <td>{new Date(s.timestamp).toLocaleString()}</td>
+              <td className="flex gap-2 py-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleLoadSubmission(s.code)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  Load
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleDeleteSubmission(s.id)}
+                  className="text-red-400 hover:text-red-600"
+                >
+                  Delete
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+
+    <div className="text-right mt-4">
+      <Button 
+        size="sm" 
+        onClick={() => setShowSavedList(false)}
+        className="bg-gray-700 hover:bg-gray-600 text-white"
+      >
+        Close
+      </Button>
+    </div>
+  </div>
+)}
+
             </div>
 
             {/* Generate Button */}
-            <div className="mt-4">
-              <Button 
-                onClick={handleGenerateCode}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+           <div className="fixed bottom-0 left-0 lg:w-1/2 w-full p-3 bg-gray-900 border-t border-gray-700 flex justify-between gap-2 z-50">
+  <Button 
+    onClick={handleGenerateCode}
+    className="w-1/2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+  >
+    <Sparkles className="mr-2" size={16} />
+    Generate
+  </Button>
+  <Button 
+    onClick={handleRunStrategy}
+    disabled={isRunning}
+    className="w-1/2 bg-emerald-600 hover:bg-emerald-700"
+  >
+    <Play className="mr-2" size={16} />
+    {isRunning ? 'Running...' : 'Simulate'}
+  </Button>
+  {/* <Button 
+                onClick={handleRunStrategy}
+                disabled={isRunning}
+                className="bg-emerald-600 hover:bg-emerald-700"
               >
-                <Sparkles className="mr-2" size={16} />
-                Generate Code with AI
-              </Button>
-            </div>
+                <Play className="mr-2" size={16} />
+                {isRunning ? 'Running...' : 'Run Strategy'}
+              </Button> */}
+</div>
 
-            <div className="mt-4 p-3 bg-gray-900 rounded-lg border border-gray-600">
+
+
+            {/* <div className="mt-4 p-3 bg-gray-900 rounded-lg border border-gray-600">
               <div className="text-sm text-gray-400 mb-2">Console Output:</div>
               <div className="text-green-400 font-mono text-xs">
                 {isRunning ? (
@@ -362,11 +570,21 @@ backtest_results = run_backtest(
                   </>
                 )}
               </div>
-            </div>
-          </Card>
+            </div> */}
+            {error && (
+  <div className="mt-4 p-3 bg-red-900 rounded-lg border border-red-700">
+    <div className="text-sm text-red-300 mb-2">Error:</div>
+    <div className="text-red-400 font-mono text-xs whitespace-pre-line">{error}</div>
+  </div>
+)}
 
-          {/* Right Side - Live Results */}
-          <Card className="p-6 bg-gray-800/50 border-gray-700 flex flex-col">
+          </Card>
+          <div className="hidden lg:block w-px bg-gray-700 absolute left-1/2 top-0 bottom-0 z-10" />
+          
+
+          <div className="w-full lg:w-1/2 h-full overflow-y-auto pr-1">
+        {/* Right Side - Live Results */}
+          <Card className="p-6 pb-[70px] bg-gray-800/50 rounded-none border-gray-700 flex flex-col min-h-full">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Live Backtest Results</h2>
               <div className="flex items-center space-x-2 text-emerald-400">
@@ -570,10 +788,53 @@ backtest_results = run_backtest(
               </Select>
               
               {renderSelectedAnalytic()}
+              {/* Footer buttons for right panel */}
+<div className="fixed bottom-0 right-0 lg:w-1/2 w-full p-3  bg-gray-900 border-t border-gray-900 flex justify-between gap-2 z-50">
+  <Button 
+    onClick={handleSaveStrategy}
+    variant="outline" 
+    className="w-1/2 border-gray-600 text-gray-300 hover:bg-gray-700"
+  >
+    <Save className="mr-2" size={16} />
+    Save
+  </Button>
+   {/* <Button 
+                onClick={handleSaveStrategy}
+                variant="outline" 
+                size="sm" 
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                <Save className="mr-2" size={16} />
+                Save
+              </Button> */}
+  <Button 
+    onClick={handleLoadStrategy}
+    variant="outline" 
+    className="w-1/2 border-gray-600 text-gray-300 hover:bg-gray-700"
+  >
+    <Upload className="mr-2" size={16} />
+    Load
+  </Button>
+   {/* <Button 
+                onClick={handleLoadStrategy}
+                variant="outline" 
+                size="sm" 
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                <Upload className="mr-2" size={16} />
+                Load
+              </Button> */}
+</div>
+
+
             </div>
           </Card>
         </div>
-      </div>
+          
+          
+        </div>
+        
+      
     </div>
   );
 };
