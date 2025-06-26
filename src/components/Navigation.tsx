@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, LogIn } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import logo from '../QElogo.png';
+
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,9 +62,24 @@ const Navigation = () => {
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-black/90 backdrop-blur-md border-b border-emerald-900/20' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex-shrink-0">
+          {/* <div className="flex-shrink-0">
             <button onClick={() => navigate('/')} className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent">QuantEdge</button>
-          </div>
+          </div> */}
+          <div className="flex-shrink-0 flex items-center space-x-2">
+ <img 
+  src={logo} 
+  alt="QuantEdge Logo"
+  className="h-20 w-20 object-contain mt-4"
+/>
+
+  <button 
+    onClick={() => navigate('/')} 
+    className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-600 bg-clip-text text-transparent"
+  >
+    QuantEdge
+  </button>
+</div>
+
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
@@ -72,9 +89,9 @@ const Navigation = () => {
                   {item.name}
                 </button>
               )}
-              <button onClick={() => navigate('/login')} className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-4 py-2 rounded-lg text-white transition-all duration-300">
+              <button onClick={() => navigate('/signup')} className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-4 py-2 rounded-lg text-white transition-all duration-300">
                 <LogIn size={16} />
-                <span>Login</span>
+                <span>Sign Up</span>
               </button>
             </div>
           </div>
@@ -96,9 +113,9 @@ const Navigation = () => {
                   {item.name}
                 </button>
               )}
-              <button onClick={() => navigate('/login')} className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-3 py-2 rounded-md text-white transition-all duration-300 w-full">
+              <button onClick={() => navigate('/signup')} className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-3 py-2 rounded-md text-white transition-all duration-300 w-full">
                 <LogIn size={16} />
-                <span>Login</span>
+                <span>Sign Up</span>
               </button>
             </div>
           </div>

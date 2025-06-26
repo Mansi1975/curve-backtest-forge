@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const HeroSection = () => {
   const navigate = useNavigate();
   const handleStartBacktesting = () => {
-    navigate('/login');
+    navigate('/signup');
   };
   return <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background with gradient */}
@@ -20,14 +20,15 @@ const HeroSection = () => {
         <div className="animate-fade-in">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             <span className="block text-white">Backtest Your</span>
-            <span className="block bg-gradient-to-r from-emerald-400 via-green-500 to-emerald-600 bg-clip-text text-transparent">
+            <span className="relative z-10 bg-gradient-to-r from-emerald-400 via-green-500 to-emerald-600 bg-clip-text text-transparent mt-2">
               Trading Strategies
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">Unlock the Power of Data-Driven Trading  
-Our advanced backtesting platform lets you test, optimise, and
-refine your trading strategies using institutional-grade analytics</p>
+          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+  Unlock the power of data-driven trading using our Advanced AI-Driven Trading platform which lets you test, optimise and refine your trading strategies using Indian market datasets.
+</p>
+
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button onClick={handleStartBacktesting} size="lg" className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 animate-pulse-green">

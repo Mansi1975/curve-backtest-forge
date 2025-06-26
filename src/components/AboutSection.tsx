@@ -1,22 +1,32 @@
 import { Shield, Zap, Target, Users } from 'lucide-react';
 const AboutSection = () => {
-  const features = [{
+ const features = [
+  {
     icon: Shield,
-    title: 'Secure & Reliable',
-    description: 'Experience back-grade security and a 99.9% uptime guarantee. Your data and trading strategies are safeguard with enterprise-level encryption, ensuring complete trust and performance'
-  }, {
+    title: 'AI-Based Strategy Generator',
+    description:
+      'Eliminate the need for coding. Describe your trading logic in natural language, and our AI will automatically generate optimized Python strategies for you.'
+  },
+  {
     icon: Zap,
-    title: 'Lightning Fast',
-    description: 'Run thousands of backtests in seconds with our high-performance algorithms and scalable cloud infrastructure. Speed meets precision-so you can iterate, refine, and deploy faster than ever '
-  }, {
+    title: 'Indian Market Data Integration',
+    description:
+      'Access extensive, real-time and historical datasets from the Indian financial markets, enabling informed strategy development tailored to your local trading environment.'
+  },
+  {
     icon: Target,
-    title: 'Precision Analytics',
-    description: 'Gain a competitive edge with advanced metrics, comprehensive risk analysis, and detailed performance attribution reports-all designed to help you understand, evaluate, and refine every aspect of your strategy'
-  }, {
+    title: 'Multi-Asset Backtesting',
+    description:
+      'Backtest and deploy strategies across a wide range of asset classes, including equities, F&O, currencies, commodities, gold, and cryptocurrencies — all in one unified platform.'
+  },
+  {
     icon: Users,
-    title: 'Community Driven',
-    description: 'Join a vibrant network of traders exchanging strategies, insights, and best practices. Learn, collaborate, and gow along side like-minded professionals and enthusiasts'
-  }];
+    title: 'No Programming Required',
+    description:
+      'Our intuitive interface empowers traders of all backgrounds to build and test strategies without writing a single line of code. Python compatibility is available for advanced users.'
+  }
+];
+
   return <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-400/10 via-emerald-800/20 to-emerald-400/10">
       {/* Top curve */}
       <div className="absolute top-0 left-0 w-full">
@@ -31,7 +41,7 @@ const AboutSection = () => {
             <span className="text-white">About </span>
             <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">QuantEdge</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">We're transforming the way traders develop and refine their strategies-delivering unmatched backtesting power through a seamless blend of advanced technology and intutive design</p>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">We're transforming the way traders develop and refine their strategies-delivering unmatched data driven power through our seamless blend of Backtester and AI</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
@@ -44,47 +54,7 @@ const AboutSection = () => {
             </div>)}
         </div>
 
-        <div className="bg-gradient-to-r from-emerald-900/30 to-green-900/30 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-emerald-700/30">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h3 className="text-3xl font-bold text-white mb-6">Why Choose QuantEdge?</h3>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-gray-300">Real-time backtesting engine</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-gray-300">Advanced risk management tools</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-gray-300">No-code AI strategy builder</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-gray-300">Custom indicator development</span>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="bg-gradient-to-br from-emerald-500/20 to-green-600/20 rounded-2xl p-8 backdrop-blur-sm">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-emerald-400 mb-2">15+ Years</div>
-                  <div className="text-gray-300 mb-4 px-0">At QuantEdge we democratize quantitative trading by making sophisticated algorithmic strategies accessible to everyone. Our AI-Powered platform eliminates the complexity of coding while providing institutional-grade backtesting capabilities.</div>
-                  <div className="text-4xl font-bold text-emerald-400 mb-2">50K+</div>
-                  <div className="text-gray-300">institutional-grade backtesting capabilities.
-
-AI-powered strategy generation from natural language
-
-Comprehensive Indian market data integration
-
-Professional-grade performance analytics</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+   
       </div>
 
       {/* Bottom curve */}

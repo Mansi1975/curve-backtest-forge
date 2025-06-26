@@ -11,12 +11,26 @@ const ContactSection = () => {
     subject: '',
     message: ''
   });
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    // TODO: Store data in CSV file when backend is connected
-    // Handle form submission here
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const res = await fetch('http://localhost:5000/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    alert('Message sent successfully!');
+    setFormData({ name: '', email: '', subject: '', message: '' });
+  } else {
+    alert('Failed to send message.');
+  }
+};
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
@@ -85,11 +99,17 @@ const ContactSection = () => {
             </Card>
 
             {/* Social Links - Only LinkedIn */}
-            <div className="flex space-x-4">
-              <a href="#" className="w-12 h-12 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-colors">
-                <Linkedin className="text-white" size={20} />
-              </a>
-            </div>
+           <div className="flex space-x-4">
+  <a
+    href="https://www.linkedin.com/company/quantedge2024/posts/?feedView=all"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-12 h-12 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-colors"
+  >
+    <Linkedin className="text-white" size={20} />
+  </a>
+</div>
+
           </div>
 
           {/* Contact Form */}

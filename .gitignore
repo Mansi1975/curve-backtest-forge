@@ -22,3 +22,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Node
+build/
+.vite/
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.cpython-*
+*.env
+venv/
+.venv/
+.env/
+pyvenv.cfg
+
