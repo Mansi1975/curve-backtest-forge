@@ -21,13 +21,15 @@ const AboutSection = () => {
   },
   {
     icon: Users,
+
     title: 'No Programming Required',
     description:
       'Our intuitive interface empowers traders of all backgrounds to build and test strategies without writing a single line of code. Python compatibility is available for advanced users.'
   }
 ];
 
-  return <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-400/10 via-emerald-800/20 to-emerald-400/10">
+  return <section id="about" className="relative py-24 bg-gradient-to-br from-emerald-900/10 via-emerald-800/10 to-green">
+
       {/* Top curve */}
       <div className="absolute top-0 left-0 w-full">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-16 md:h-24 transform rotate-180">
