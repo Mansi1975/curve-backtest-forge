@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
       }
     }
   },
+  base: '/curve-backtest-forge/',
   plugins: [
     react(),
     mode === 'development' &&
