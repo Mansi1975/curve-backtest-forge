@@ -7,6 +7,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   base: mode === "development" ? "/" : "/curve-backtest-forge/",
   server: {
+    port: 5173,
     proxy: {
       "/api": {
         target: "http://localhost:5173",
