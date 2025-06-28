@@ -30,7 +30,7 @@ const Signup = () => {
   }
 
  try {
-  const res = await fetch('https://curve-backtest-forge.onrender.com/', {
+  const res = await fetch('https://curve-backtest-forge.onrender.com/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

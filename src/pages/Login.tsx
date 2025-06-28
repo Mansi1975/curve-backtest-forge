@@ -16,7 +16,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   try {
-    const res = await fetch('https://curve-backtest-forge.onrender.com/', {
+    const res = await fetch('https://curve-backtest-forge.onrender.com/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
