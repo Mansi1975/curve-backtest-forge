@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === "development" ? "/" : "/curve-backtest-forge/",
+  base: mode === "development" ? "/curve-backtest-forge/" : "/curve-backtest-forge/",
   server: {
     port: 5173,
     proxy: {
