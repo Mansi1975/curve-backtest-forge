@@ -4,6 +4,11 @@ from utils import create_user, authenticate_user, logout_user
 from email.mime.text import MIMEText
 from email_utils import send_email
 import smtplib
+import pandas as pd
+import os
+
+from backtester import Backtester
+from strategy import Strategy
 
 app = Flask(__name__)
 CORS(app)
@@ -107,6 +112,27 @@ def logout():
 
     success, message = logout_user(email)
     return jsonify({'success': success, 'message': message}), (200 if success else 400)
+
+@app.route('/api/backtest', methods=['GET'])
+def run_backtest():
+    try:
+        filepath = os.path.join(os.path.dirname(__file__), 'data', 'multi_level_ohlcv.csv')
+        data = pd.read_csv(filepath, index_col=0, header=[0, 1], parse_dates=True)[4500:]
+        tickers = data.columns.get_level_values(0).unique()[100:200]
+        data = data.loc[:, data.columns.get_level_values(0).isin(tickers)]
+        initial_value = 200000.0
+
+        bt = Backtester(data, initial_value)
+        bt.run()
+        pf = bt.vectorbt_run()
+        equity_curve = pf.value().reset_index()
+        equity_curve.columns = ['date', 'portfolio_value']
+        equity_curve['date'] = equity_curve['date'].astype(str)
+
+        return jsonify({'equity_curve': equity_curve.to_dict(orient='records')})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 50
 
 if __name__ == '__main__':
     app.run(debug=True)
