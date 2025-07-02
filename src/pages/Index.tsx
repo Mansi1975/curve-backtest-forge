@@ -5,12 +5,15 @@ import AboutSection from '@/components/AboutSection';
 import BacktestSection from '@/components/BacktestSection';
 import ContactSection from '@/components/ContactSection';
 import Footer from '@/components/Footer';
+import React from 'react';
+import EquityDrawdownCharts from '@/components/platform/EquityDrawdownCharts'; // adjust path as needed
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navigation />
       <HeroSection />
+      <EquityDrawdownCharts />
       <AboutSection />
       <BacktestSection />
       <ContactSection />

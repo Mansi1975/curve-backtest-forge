@@ -6,8 +6,9 @@ from email_utils import send_email
 import smtplib
 import pandas as pd
 import os
+from flask import send_file
 
-from backtester import Backtester
+from backtester.soq_backtester.backtester import Backtester
 from strategy import Strategy
 
 app = Flask(__name__)
@@ -113,26 +114,62 @@ def logout():
     success, message = logout_user(email)
     return jsonify({'success': success, 'message': message}), (200 if success else 400)
 
+
 @app.route('/api/backtest', methods=['GET'])
 def run_backtest():
     try:
         filepath = os.path.join(os.path.dirname(__file__), 'data', 'multi_level_ohlcv.csv')
-        data = pd.read_csv(filepath, index_col=0, header=[0, 1], parse_dates=True)[4500:]
+
+        # Load only once
+        data = pd.read_csv(filepath, header=[0, 1], index_col=0, parse_dates=True)
+        
+        # Slice the data as done in notebook
+        data = data[4500:]
         tickers = data.columns.get_level_values(0).unique()[100:200]
         data = data.loc[:, data.columns.get_level_values(0).isin(tickers)]
-        initial_value = 200000.0
 
+        # Instantiate and run Backtester (assumes logic from notebook is encapsulated)
+        initial_value = 200000.0
         bt = Backtester(data, initial_value)
         bt.run()
-        pf = bt.vectorbt_run()
-        equity_curve = pf.value().reset_index()
+        portfolio = bt.vectorbt_run()
+
+        # Return key results
+        equity_curve = portfolio.value().reset_index()
         equity_curve.columns = ['date', 'portfolio_value']
         equity_curve['date'] = equity_curve['date'].astype(str)
 
-        return jsonify({'equity_curve': equity_curve.to_dict(orient='records')})
+        metrics = portfolio.stats().to_dict()
+        weights = portfolio.weights.to_frame().reset_index()
+        weights.columns = ['date'] + list(weights.columns[1:])
+        weights['date'] = weights['date'].astype(str)
+
+        return jsonify({
+            'equity_curve': equity_curve.to_dict(orient='records'),
+            'metrics': metrics,
+            'weights': weights.to_dict(orient='records')
+        })
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 50
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route("/api/equity-curve")
+def equity_curve():
+    return send_file("data/frontend_data/equity_curve.csv")
+
+@app.route("/api/drawdown")
+def drawdown():
+    return send_file("data/frontend_data/drawdown.csv")
+
+@app.route("/api/returns")
+def returns():
+    return send_file("data/frontend_data/returns.csv")
+
+@app.route("/api/portfolio-summary")
+def get_portfolio_summary():
+    file_path = os.path.join("backtester", "soq_backtester","portfolio.csv")
+    return send_file(file_path, mimetype='text/csv')
 
 if __name__ == '__main__':
     app.run(debug=True)
