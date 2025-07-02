@@ -7,6 +7,7 @@ import ContactSection from '@/components/ContactSection';
 import Footer from '@/components/Footer';
 import React from 'react';
 import EquityDrawdownCharts from '@/components/platform/EquityDrawdownCharts'; // adjust path as needed
+import CandlestickChart from '@/components/platform/CandlestickChart';
 
 const Index = () => {
   return (
@@ -14,6 +15,7 @@ const Index = () => {
       <Navigation />
       <HeroSection />
       <EquityDrawdownCharts />
+      <CandlestickChart />
       <AboutSection />
       <BacktestSection />
       <ContactSection />

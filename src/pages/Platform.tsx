@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,27 +36,33 @@ import {
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
+interface PortfolioDataPoint {
+  date: string;
+  equity: number;
+  drawdown: number;
+}
+
+interface CandlestickDataPoint {
+  date: string;
+  close: number;
+  action: string | null;
+}
+
+interface StockData {
+  [key: string]: CandlestickDataPoint[];
+}
+
 const Platform = () => {
   const navigate = useNavigate();
   const [selectedTimeframe, setSelectedTimeframe] = useState('1Y');
-  const [selectedStocks, setSelectedStocks] = useState(['AAPL', 'MSFT', 'GOOGL']);
+  const [selectedStocks, setSelectedStocks] = useState<string[]>([]);
+  const [portfolioData, setPortfolioData] = useState<PortfolioDataPoint[]>([]);
+  const [stockData, setStockData] = useState<StockData>({});
+  const [tickers, setTickers] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [performanceMetrics, setPerformanceMetrics] = useState<any[]>([]);
 
   // Enhanced data with more comprehensive metrics
-  const equityData = [
-    { date: 'Jan', value: 100000, benchmark: 100000, drawdown: 0 },
-    { date: 'Feb', value: 105000, benchmark: 102000, drawdown: 0 },
-    { date: 'Mar', value: 112000, benchmark: 104000, drawdown: 0 },
-    { date: 'Apr', value: 108000, benchmark: 103000, drawdown: -3.6 },
-    { date: 'May', value: 121000, benchmark: 108000, drawdown: 0 },
-    { date: 'Jun', value: 119000, benchmark: 109000, drawdown: -1.7 },
-    { date: 'Jul', value: 128000, benchmark: 111000, drawdown: 0 },
-    { date: 'Aug', value: 124000, benchmark: 110000, drawdown: -3.1 },
-    { date: 'Sep', value: 132000, benchmark: 113000, drawdown: 0 },
-    { date: 'Oct', value: 129000, benchmark: 112000, drawdown: -2.3 },
-    { date: 'Nov', value: 138000, benchmark: 115000, drawdown: 0 },
-    { date: 'Dec', value: 142000, benchmark: 118000, drawdown: 0 },
-  ];
-
   const returnsHistogram = [
     { return: '-5%', frequency: 2 },
     { return: '-4%', frequency: 3 },
@@ -71,73 +77,80 @@ const Platform = () => {
     { return: '5%', frequency: 3 },
   ];
 
-  const stockData = {
-    AAPL: [
-      { date: 'Jan', value: 10000, position: null },
-      { date: 'Feb', value: 10500, position: 'buy' },
-      { date: 'Mar', value: 11200, position: null },
-      { date: 'Apr', value: 10800, position: null },
-      { date: 'May', value: 12100, position: 'sell' },
-      { date: 'Jun', value: 11900, position: null },
-      { date: 'Jul', value: 12800, position: 'buy' },
-      { date: 'Aug', value: 12400, position: null },
-      { date: 'Sep', value: 13200, position: null },
-      { date: 'Oct', value: 12900, position: 'sell' },
-      { date: 'Nov', value: 13800, position: null },
-      { date: 'Dec', value: 14200, position: null },
-    ],
-    MSFT: [
-      { date: 'Jan', value: 8000, position: null },
-      { date: 'Feb', value: 8200, position: 'buy' },
-      { date: 'Mar', value: 8800, position: null },
-      { date: 'Apr', value: 8500, position: null },
-      { date: 'May', value: 9200, position: null },
-      { date: 'Jun', value: 9100, position: 'sell' },
-      { date: 'Jul', value: 9600, position: 'buy' },
-      { date: 'Aug', value: 9300, position: null },
-      { date: 'Sep', value: 9800, position: null },
-      { date: 'Oct', value: 9600, position: null },
-      { date: 'Nov', value: 10200, position: 'sell' },
-      { date: 'Dec', value: 10500, position: null },
-    ],
-    GOOGL: [
-      { date: 'Jan', value: 12000, position: null },
-      { date: 'Feb', value: 11800, position: null },
-      { date: 'Mar', value: 12300, position: 'buy' },
-      { date: 'Apr', value: 11900, position: null },
-      { date: 'May', value: 12600, position: null },
-      { date: 'Jun', value: 12400, position: 'sell' },
-      { date: 'Jul', value: 13100, position: 'buy' },
-      { date: 'Aug', value: 12800, position: null },
-      { date: 'Sep', value: 13400, position: null },
-      { date: 'Oct', value: 13200, position: null },
-      { date: 'Nov', value: 13900, position: 'sell' },
-      { date: 'Dec', value: 14300, position: null },
-    ],
-  };
-
   const monthlyPnL = [
     { year: 2023, Jan: 2.5, Feb: -0.8, Mar: 4.2, Apr: -1.5, May: 3.8, Jun: -0.3, Jul: 5.1, Aug: -2.1, Sep: 3.6, Oct: -1.2, Nov: 4.5, Dec: 2.8 },
     { year: 2024, Jan: 3.2, Feb: 1.8, Mar: -2.3, Apr: 4.6, May: -0.9, Jun: 2.1, Jul: 3.7, Aug: -1.6, Sep: 5.2, Oct: -0.7, Nov: 3.9, Dec: 2.4 },
   ];
 
-  const performanceMetrics = [
-    { metric: 'Max Profit', value: '₹15,420', description: 'Largest single trade gain' },
-    { metric: 'Max Loss', value: '₹-8,340', description: 'Largest single trade loss' },
-    { metric: 'Average Return', value: '2.3%', description: 'Average return per trade' },
-    { metric: 'Sharpe Ratio', value: '2.14', description: 'Risk-adjusted return measure' },
-    { metric: 'Sortino Ratio', value: '2.67', description: 'Downside deviation measure' },
-    { metric: 'CAGR', value: '18.5%', description: 'Compound Annual Growth Rate' },
-    { metric: 'Win Rate', value: '68.2%', description: 'Percentage of profitable trades' },
-    { metric: 'Max Drawdown', value: '-8.4%', description: 'Largest peak-to-trough decline' },
-    { metric: 'Volatility', value: '12.3%', description: 'Standard deviation of returns' },
-    { metric: 'Alpha', value: '0.045', description: 'Excess return vs benchmark' },
-    { metric: 'Beta', value: '0.87', description: 'Correlation with market' },
-    { metric: 'Total Trades', value: '247', description: 'Number of completed trades' },
-  ];
-
   const timeframes = ['1M', '3M', '6M', '1Y', 'ALL'];
-  const availableStocks = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA', 'META', 'AMZN', 'NFLX'];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch portfolio summary data
+        const portfolioRes = await fetch('http://localhost:5001/portfolio_summary');
+        if (!portfolioRes.ok) throw new Error('Failed to fetch portfolio data');
+        const portfolioData = await portfolioRes.json();
+        
+        // Format data for charts
+        const formattedData = portfolioData.map((item: any) => ({
+          date: new Date(item.date).toLocaleDateString('en-US', { month: 'short' }),
+          value: item.equity,
+          drawdown: item.drawdown
+        }));
+        setPortfolioData(formattedData);
+        
+        // Fetch available tickers
+        const tickersRes = await fetch('http://localhost:5001/tickers');
+        if (!tickersRes.ok) throw new Error('Failed to fetch tickers');
+        const tickers = await tickersRes.json();
+        setTickers(tickers);
+        
+        // Set default selected stocks (first 3)
+        const defaultStocks = tickers.slice(0, 3);
+        setSelectedStocks(defaultStocks);
+        
+        // Fetch data for default stocks
+        const stockData: StockData = {};
+        for (const ticker of defaultStocks) {
+          const res = await fetch(`http://localhost:5001/candlestick/${ticker}`);
+          if (!res.ok) continue;
+          const data = await res.json();
+          stockData[ticker] = data.data.map((item: any) => ({
+            date: new Date(item.date).toLocaleDateString('en-US', { month: 'short' }),
+            value: item.close,
+            action: item.action
+          }));
+        }
+        setStockData(stockData);
+        
+        // Set performance metrics (hardcoded for now)
+        setPerformanceMetrics([
+          { metric: 'Max Profit', value: '₹15,420', description: 'Largest single trade gain' },
+          { metric: 'Max Loss', value: '₹-8,340', description: 'Largest single trade loss' },
+          { metric: 'Average Return', value: '2.3%', description: 'Average return per trade' },
+          { metric: 'Sharpe Ratio', value: '2.14', description: 'Risk-adjusted return measure' },
+          { metric: 'Sortino Ratio', value: '2.67', description: 'Downside deviation measure' },
+          { metric: 'CAGR', value: '18.5%', description: 'Compound Annual Growth Rate' },
+          { metric: 'Win Rate', value: '68.2%', description: 'Percentage of profitable trades' },
+          { metric: 'Max Drawdown', value: '-8.4%', description: 'Largest peak-to-trough decline' },
+          { metric: 'Volatility', value: '12.3%', description: 'Standard deviation of returns' },
+          { metric: 'Alpha', value: '0.045', description: 'Excess return vs benchmark' },
+          { metric: 'Beta', value: '0.87', description: 'Correlation with market' },
+          { metric: 'Total Trades', value: '247', description: 'Number of completed trades' },
+        ]);
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
   const getPositionColor = (position: string | null) => {
     if (position === 'buy') return '#10b981';
@@ -157,6 +170,48 @@ const Platform = () => {
   const handleBackToCodeEditor = () => {
     navigate('/code-editor');
   };
+
+  const handleStockToggle = async (stock: string, checked: boolean) => {
+    if (checked) {
+      // Add stock to selection
+      setSelectedStocks(prev => [...prev, stock]);
+      
+      // Fetch data for this stock if not already loaded
+      if (!stockData[stock]) {
+        try {
+          const res = await fetch(`http://localhost:5001/candlestick/${stock}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          const formattedData = data.data.map((item: any) => ({
+            date: new Date(item.date).toLocaleDateString('en-US', { month: 'short' }),
+            value: item.close,
+            action: item.action
+          }));
+          
+          setStockData(prev => ({
+            ...prev,
+            [stock]: formattedData
+          }));
+        } catch (error) {
+          console.error(`Error fetching data for ${stock}:`, error);
+        }
+      }
+    } else {
+      // Remove stock from selection
+      setSelectedStocks(prev => prev.filter(s => s !== stock));
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p>Loading backtest results...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -268,7 +323,7 @@ const Platform = () => {
           <Card className="p-6 bg-gray-800/50 border-gray-700">
             <h3 className="text-xl font-semibold text-white mb-6">Equity Curve</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={equityData}>
+              <AreaChart data={portfolioData}>
                 <defs>
                   <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -294,14 +349,6 @@ const Platform = () => {
                   fill="url(#equityGradient)"
                   name="Portfolio Value"
                 />
-                <Line
-                  type="monotone"
-                  dataKey="benchmark"
-                  stroke="#6b7280"
-                  strokeWidth={1}
-                  strokeDasharray="5 5"
-                  name="Benchmark"
-                />
               </AreaChart>
             </ResponsiveContainer>
           </Card>
@@ -309,7 +356,7 @@ const Platform = () => {
           <Card className="p-6 bg-gray-800/50 border-gray-700">
             <h3 className="text-xl font-semibold text-white mb-6">Drawdown Curve</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={equityData}>
+              <AreaChart data={portfolioData}>
                 <defs>
                   <linearGradient id="drawdownGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
@@ -368,20 +415,16 @@ const Platform = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <h3 className="text-xl font-semibold text-white">Individual Stock Performance</h3>
             <div className="flex flex-wrap gap-2">
-              {availableStocks.map((stock) => (
-                <div key={stock} className="flex items-center space-x-2">
+              {tickers.map((ticker) => (
+                <div key={ticker} className="flex items-center space-x-2">
                   <Checkbox
-                    id={stock}
-                    checked={selectedStocks.includes(stock)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedStocks([...selectedStocks, stock]);
-                      } else {
-                        setSelectedStocks(selectedStocks.filter(s => s !== stock));
-                      }
-                    }}
+                    id={ticker}
+                    checked={selectedStocks.includes(ticker)}
+                    onCheckedChange={(checked) => 
+                      handleStockToggle(ticker, checked === true)
+                    }
                   />
-                  <label htmlFor={stock} className="text-sm text-gray-300">{stock}</label>
+                  <label htmlFor={ticker} className="text-sm text-gray-300">{ticker}</label>
                 </div>
               ))}
             </div>
@@ -399,32 +442,37 @@ const Platform = () => {
                   borderRadius: '8px'
                 }} 
               />
-              {selectedStocks.map((stock, index) => {
+              {selectedStocks.map((ticker, index) => {
                 const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16', '#f97316'];
-                return stockData[stock as keyof typeof stockData] ? (
+                const stockPoints = stockData[ticker] || [];
+                
+                return (
                   <Line
-                    key={stock}
+                    key={ticker}
                     type="monotone"
                     dataKey="value"
-                    data={stockData[stock as keyof typeof stockData]}
+                    data={stockPoints}
                     stroke={colors[index % colors.length]}
                     strokeWidth={2}
-                    name={stock}
+                    name={ticker}
                     dot={(props: any) => {
-                      const position = stockData[stock as keyof typeof stockData][props.index]?.position;
-                      return position ? (
+                      const point = stockPoints[props.index];
+                      if (!point) return null;
+                      
+                      const action = point.action;
+                      return action === 'buy' || action === 'sell' ? (
                         <circle
                           cx={props.cx}
                           cy={props.cy}
                           r={4}
-                          fill={getPositionColor(position)}
+                          fill={getPositionColor(action)}
                           stroke="#fff"
                           strokeWidth={1}
                         />
                       ) : null;
                     }}
                   />
-                ) : null;
+                );
               })}
             </LineChart>
           </ResponsiveContainer>
