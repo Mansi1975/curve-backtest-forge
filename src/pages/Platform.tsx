@@ -2,25 +2,21 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import ReturnsHistogram from '@/components/platform/ReturnsHistogram';
+import { ReturnsDataPoint } from '@/components/platform/types';
 import { 
-  LineChart, 
-  Line, 
   AreaChart, 
   Area, 
-  BarChart, 
-  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  ScatterChart,
-  Scatter
+  LineChart,
+  Line,
+  BarChart,
+  Bar
 } from 'recharts';
 import { 
   TrendingUp, 
@@ -30,26 +26,31 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   ArrowLeft,
-  Minus,
   Calendar,
   BarChart3
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface PortfolioDataPoint {
-  date: string;
-  equity: number;
+  date: number; // timestamp
+  value: number;
   drawdown: number;
 }
 
 interface CandlestickDataPoint {
   date: string;
-  close: number;
+  value: number;
   action: string | null;
 }
 
 interface StockData {
   [key: string]: CandlestickDataPoint[];
+}
+
+interface PerformanceMetric {
+  metric: string;
+  value: string;
+  description: string;
 }
 
 const Platform = () => {
@@ -60,22 +61,8 @@ const Platform = () => {
   const [stockData, setStockData] = useState<StockData>({});
   const [tickers, setTickers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [performanceMetrics, setPerformanceMetrics] = useState<any[]>([]);
-
-  // Enhanced data with more comprehensive metrics
-  const returnsHistogram = [
-    { return: '-5%', frequency: 2 },
-    { return: '-4%', frequency: 3 },
-    { return: '-3%', frequency: 8 },
-    { return: '-2%', frequency: 15 },
-    { return: '-1%', frequency: 25 },
-    { return: '0%', frequency: 35 },
-    { return: '1%', frequency: 28 },
-    { return: '2%', frequency: 18 },
-    { return: '3%', frequency: 12 },
-    { return: '4%', frequency: 6 },
-    { return: '5%', frequency: 3 },
-  ];
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetric[]>([]);
+  const [returnsHistogram, setReturnsHistogram] = useState<ReturnsDataPoint[]>([]);
 
   const monthlyPnL = [
     { year: 2023, Jan: 2.5, Feb: -0.8, Mar: 4.2, Apr: -1.5, May: 3.8, Jun: -0.3, Jul: 5.1, Aug: -2.1, Sep: 3.6, Oct: -1.2, Nov: 4.5, Dec: 2.8 },
@@ -92,11 +79,11 @@ const Platform = () => {
         // Fetch portfolio summary data
         const portfolioRes = await fetch('http://localhost:5001/portfolio_summary');
         if (!portfolioRes.ok) throw new Error('Failed to fetch portfolio data');
-        const portfolioData = await portfolioRes.json();
+        const portfolioJson = await portfolioRes.json();
         
         // Format data for charts
-        const formattedData = portfolioData.map((item: any) => ({
-          date: new Date(item.date).toLocaleDateString('en-US', { month: 'short' }),
+        const formattedData = portfolioJson.map((item: any) => ({
+          date: new Date(item.date).getTime(),
           value: item.equity,
           drawdown: item.drawdown
         }));
@@ -107,7 +94,21 @@ const Platform = () => {
         if (!tickersRes.ok) throw new Error('Failed to fetch tickers');
         const tickers = await tickersRes.json();
         setTickers(tickers);
+
+        // Fetch returns histogram data
+        const histogramRes = await fetch('http://localhost:5001/returns_histogram');
+        const rawData = await histogramRes.json();
+
+        const formattedHistogram = rawData.map(bin => ({
+          ...bin,
+          midpoint: ((bin.bin_start + bin.bin_end) / 2).toFixed(3)
+        }));
+        setReturnsHistogram(formattedHistogram);
+
+
+
         
+
         // Set default selected stocks (first 3)
         const defaultStocks = tickers.slice(0, 3);
         setSelectedStocks(defaultStocks);
@@ -126,21 +127,11 @@ const Platform = () => {
         }
         setStockData(stockData);
         
-        // Set performance metrics (hardcoded for now)
-        setPerformanceMetrics([
-          { metric: 'Max Profit', value: '₹15,420', description: 'Largest single trade gain' },
-          { metric: 'Max Loss', value: '₹-8,340', description: 'Largest single trade loss' },
-          { metric: 'Average Return', value: '2.3%', description: 'Average return per trade' },
-          { metric: 'Sharpe Ratio', value: '2.14', description: 'Risk-adjusted return measure' },
-          { metric: 'Sortino Ratio', value: '2.67', description: 'Downside deviation measure' },
-          { metric: 'CAGR', value: '18.5%', description: 'Compound Annual Growth Rate' },
-          { metric: 'Win Rate', value: '68.2%', description: 'Percentage of profitable trades' },
-          { metric: 'Max Drawdown', value: '-8.4%', description: 'Largest peak-to-trough decline' },
-          { metric: 'Volatility', value: '12.3%', description: 'Standard deviation of returns' },
-          { metric: 'Alpha', value: '0.045', description: 'Excess return vs benchmark' },
-          { metric: 'Beta', value: '0.87', description: 'Correlation with market' },
-          { metric: 'Total Trades', value: '247', description: 'Number of completed trades' },
-        ]);
+        // Fetch performance metrics
+        const metricsRes = await fetch('http://localhost:5001/performance_metrics');
+        if (!metricsRes.ok) throw new Error('Failed to fetch performance metrics');
+        const metricsData: PerformanceMetric[] = await metricsRes.json();
+        setPerformanceMetrics(metricsData);
         
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -152,12 +143,50 @@ const Platform = () => {
     fetchData();
   }, []);
 
+  // Create formatter for currency values
+  const currencyFormatter = new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+
+  // Calculate portfolio metrics for the top cards
+  const initialValue = portfolioData.length > 0 ? portfolioData[0].value : 0;
+  const finalValue = portfolioData.length > 0 ? portfolioData[portfolioData.length - 1].value : 0;
+  const profit = finalValue - initialValue;
+  
+  // Format profit with sign and currency symbol
+  let profitText = currencyFormatter.format(Math.abs(profit));
+  if (profit > 0) {
+    profitText = `+${profitText}`;
+  } else if (profit < 0) {
+    profitText = `-${profitText}`;
+  }
+
+  // Get metric value safely
+  const getMetricValue = (metricName: string) => {
+    const metric = performanceMetrics.find(m => m.metric === metricName);
+    return metric ? metric.value : 'N/A';
+  };
+
+  // Helper to get numeric value safely
+  const getMetricNumericValue = (metricName: string) => {
+    const value = getMetricValue(metricName);
+    if (value === 'N/A') return NaN;
+    // Remove percentage sign if present
+    const cleanValue = value.replace('%', '');
+    return parseFloat(cleanValue);
+  };
+
+  // Get position color for buy/sell markers
   const getPositionColor = (position: string | null) => {
     if (position === 'buy') return '#10b981';
     if (position === 'sell') return '#ef4444';
     return 'transparent';
   };
 
+  // Get CSS class for PnL cell based on value
   const getPnLCellColor = (value: number) => {
     if (value > 3) return 'bg-green-600/30 text-green-300';
     if (value > 1) return 'bg-green-500/20 text-green-400';
@@ -213,6 +242,13 @@ const Platform = () => {
     );
   }
 
+
+  // Precompute metric values for top cards
+  const totalReturn = getMetricValue('Total Return');
+  const cagr = getMetricValue('CAGR');
+  const sharpeRatio = getMetricValue('Sharpe Ratio');
+  const maxDrawdown = getMetricValue('Max Drawdown');
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -265,10 +301,12 @@ const Platform = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Return</p>
-                <p className="text-2xl font-bold text-emerald-400">+42.3%</p>
+                <p className="text-2xl font-bold text-emerald-400">
+                  {totalReturn}
+                </p>
                 <p className="text-sm text-emerald-400 flex items-center">
                   <ArrowUpRight size={16} className="mr-1" />
-                  +5.2% this month
+                  {cagr}
                 </p>
               </div>
               <TrendingUp className="text-emerald-400" size={32} />
@@ -279,10 +317,18 @@ const Platform = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Portfolio Value</p>
-                <p className="text-2xl font-bold text-white">₹1,42,470</p>
-                <p className="text-sm text-green-400 flex items-center">
-                  <ArrowUpRight size={16} className="mr-1" />
-                  +₹42,470
+                <p className="text-2xl font-bold text-white">
+                  {currencyFormatter.format(finalValue)}
+                </p>
+                <p className={`text-sm flex items-center ${
+                  profit >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {profit >= 0 ? (
+                    <ArrowUpRight size={16} className="mr-1" />
+                  ) : (
+                    <ArrowDownRight size={16} className="mr-1" />
+                  )}
+                  {profitText}
                 </p>
               </div>
               <DollarSign className="text-green-400" size={32} />
@@ -293,10 +339,13 @@ const Platform = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Sharpe Ratio</p>
-                <p className="text-2xl font-bold text-blue-400">2.14</p>
+                <p className="text-2xl font-bold text-blue-400">
+                  {sharpeRatio}
+                </p>
                 <p className="text-sm text-blue-400 flex items-center">
                   <ArrowUpRight size={16} className="mr-1" />
-                  Excellent
+                  {!isNaN(getMetricNumericValue('Sharpe Ratio')) && 
+                    (getMetricNumericValue('Sharpe Ratio') > 1.5 ? 'Excellent' : 'Good')}
                 </p>
               </div>
               <Target className="text-blue-400" size={32} />
@@ -307,10 +356,14 @@ const Platform = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Max Drawdown</p>
-                <p className="text-2xl font-bold text-red-400">-8.4%</p>
+                <p className="text-2xl font-bold text-red-400">
+                  {maxDrawdown}
+                </p>
                 <p className="text-sm text-red-400 flex items-center">
                   <ArrowDownRight size={16} className="mr-1" />
-                  Within limits
+                  {!isNaN(getMetricNumericValue('Max Drawdown')) && 
+                    (Math.abs(getMetricNumericValue('Max Drawdown')) < 10 ? 
+                    'Within limits' : 'High risk')}
                 </p>
               </div>
               <Activity className="text-red-400" size={32} />
@@ -331,14 +384,27 @@ const Platform = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="date" stroke="#9ca3af" />
+                <XAxis
+                  dataKey="date"
+                  stroke="#9ca3af"
+                  type="number"
+                  scale="time"
+                  domain={['dataMin', 'dataMax']}
+                  tickFormatter={(timestamp) => new Date(timestamp).getFullYear().toString()}
+                  minTickGap={40}
+                />
                 <YAxis stroke="#9ca3af" />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: '#1f2937', 
                     border: '1px solid #374151',
                     borderRadius: '8px'
-                  }} 
+                  }}
+                  labelFormatter={(timestamp) => {
+                    const date = new Date(timestamp);
+                    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                  }}
+                  formatter={(value) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Portfolio Value']} 
                 />
                 <Area
                   type="monotone"
@@ -364,14 +430,27 @@ const Platform = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="date" stroke="#9ca3af" />
+                <XAxis
+                  dataKey="date"
+                  stroke="#9ca3af"
+                  type="number"
+                  scale="time"
+                  domain={['dataMin', 'dataMax']}
+                  tickFormatter={(timestamp) => new Date(timestamp).getFullYear().toString()}
+                  minTickGap={40}
+                />
                 <YAxis stroke="#9ca3af" />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: '#1f2937', 
                     border: '1px solid #374151',
                     borderRadius: '8px'
-                  }} 
+                  }}
+                  labelFormatter={(timestamp) => {
+                    const date = new Date(timestamp);
+                    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                  }}
+                  formatter={(value) => [`${value}%`, 'Drawdown']} 
                 />
                 <Area
                   type="monotone"
@@ -388,27 +467,54 @@ const Platform = () => {
         </div>
 
         {/* Returns Histogram */}
-        <Card className="p-6 bg-gray-800/50 border-gray-700 mb-8">
-          <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-            <BarChart3 className="mr-2" />
-            Histogram of Returns
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={returnsHistogram}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="return" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1f2937', 
-                  border: '1px solid #374151',
-                  borderRadius: '8px'
-                }} 
-              />
-              <Bar dataKey="frequency" fill="#3b82f6" name="Frequency" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
+        {returnsHistogram.length > 0 ? (
+          <Card className="p-6 bg-gray-800/50 border-gray-700 mb-8">
+            <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+              <BarChart3 className="mr-2" />
+              Histogram of Returns
+            </h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={returnsHistogram}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis
+                  dataKey="midpoint"
+                  stroke="#9ca3af"
+                  tick={{ fontSize: 12 }}
+                  angle={-45}
+                  height={60}
+                />
+
+
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1f2937', 
+                    border: '1px solid #374151',
+                    borderRadius: '8px'
+                  }}
+                  formatter={(value: any) => [value, 'Frequency']}
+                  labelFormatter={(label: any, payload: any[]) => {
+                    if (!payload || !payload.length || !payload[0]?.payload) return '';
+                    
+                    const bin = payload[0].payload;
+                    return `[${bin.bin_start.toFixed(3)}, ${bin.bin_end.toFixed(3)}]`;
+                  }}
+                />
+
+
+
+                <Bar dataKey="frequency" fill="#3b82f6" name="Frequency" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        ) : !loading && (
+          <Card className="p-6 bg-gray-800/50 border-gray-700 mb-8 h-80 flex items-center justify-center">
+            <div className="text-center text-gray-400">
+              <BarChart3 className="mx-auto mb-4" size={48} />
+              <p>No returns distribution data available</p>
+            </div>
+          </Card>
+        )}
 
         {/* Stock Selection and Individual Curves */}
         <Card className="p-6 bg-gray-800/50 border-gray-700 mb-8">

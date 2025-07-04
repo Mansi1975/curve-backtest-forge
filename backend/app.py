@@ -24,12 +24,15 @@ CORS(app)
 # Configuration - make path absolute
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # FIX: Correct path to frontend data
-FRONTEND_DATA_PATH = os.path.join(BASE_DIR, "data", "frontend_data")
+FRONTEND_PATH = os.path.join(BASE_DIR, "data", "frontend_data")
 PRELOADED_DATA = {}
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def home():
+    if request.method == 'GET':
+        return "✅ Flask backend is running."
     return jsonify({'message': 'Backend running'}), 200
+    
 
 @app.route('/contact', methods=['POST'])
 def contact():
@@ -94,7 +97,7 @@ def load_precomputed_data():
     
     try:
         # Portfolio summary data
-        portfolio_path = os.path.join(FRONTEND_DATA_PATH, "portfolio_summary.json")
+        portfolio_path = os.path.join(FRONTEND_PATH, "portfolio_summary.json")
         if os.path.exists(portfolio_path):
             with open(portfolio_path) as f:
                 PRELOADED_DATA['portfolio_summary'] = json.load(f)
@@ -102,7 +105,7 @@ def load_precomputed_data():
             app.logger.warning(f"Portfolio summary not found at: {portfolio_path}")
         
         # Candlestick tickers
-        charts_dir = os.path.join(FRONTEND_DATA_PATH, "charts")
+        charts_dir = os.path.join(FRONTEND_PATH, "charts")
         if os.path.exists(charts_dir):
             PRELOADED_DATA['tickers'] = [
                 f.replace(".json", "") 
@@ -111,12 +114,27 @@ def load_precomputed_data():
             ]
         else:
             app.logger.warning(f"Charts directory not found: {charts_dir}")
-            
+
+          # NEW: Load returns histogram data
+        histogram_path = os.path.join(FRONTEND_PATH, "returns_histogram.json")
+        if os.path.exists(histogram_path):
+            with open(histogram_path) as f:
+                PRELOADED_DATA['returns_histogram'] = json.load(f)
+        else:
+            app.logger.warning(f"Returns histogram not found at: {histogram_path}")
+
+        # Load performance metrics
+        metrics_path = os.path.join(FRONTEND_PATH, "performance_metrics.json")
+        if os.path.exists(metrics_path):
+            with open(metrics_path) as f:
+                PRELOADED_DATA['performance_metrics'] = json.load(f)
+        else:
+            app.logger.warning(f"Performance metrics not found at: {metrics_path}")
     except Exception as e:
         app.logger.error(f"Error loading precomputed data: {e}")
 
 # FIX: Change endpoint name to match frontend
-@app.route('/portfolio_summary', methods=['GET'])
+@app.route('/portfolio_summary', methods=['GET', 'POST'])
 def get_portfolio_summary():
     """Get portfolio summary data"""
     if 'portfolio_summary' in PRELOADED_DATA:
@@ -136,7 +154,7 @@ def get_tickers():
 def get_candlestick(ticker):
     """Get candlestick data for a specific ticker"""
     try:
-        file_path = os.path.join(FRONTEND_DATA_PATH, "charts", f"{ticker}.json")
+        file_path = os.path.join(FRONTEND_PATH, "charts", f"{ticker}.json")
         if not os.path.exists(file_path):
             return jsonify({'error': 'Ticker not found'}), 404
         
@@ -144,6 +162,19 @@ def get_candlestick(ticker):
             return jsonify(json.load(f))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/returns_histogram', methods=['GET'])
+def get_returns_histogram():
+    """Get returns histogram data"""
+    if 'returns_histogram' in PRELOADED_DATA:
+        return jsonify(PRELOADED_DATA['returns_histogram'])
+    return jsonify({'error': 'Returns histogram data not available'}), 404
+
+@app.route('/performance_metrics', methods=['GET'])
+def get_performance_metrics():
+    if 'performance_metrics' in PRELOADED_DATA:
+        return jsonify(PRELOADED_DATA['performance_metrics'])
+    return jsonify({'error': 'Performance metrics not available'}), 404
 
 @app.route('/run-backtest', methods=['POST'])
 def run_backtest():
@@ -158,7 +189,7 @@ def run_backtest():
 
 if __name__ == '__main__':
     # Ensure data directory exists
-    os.makedirs(FRONTEND_DATA_PATH, exist_ok=True)
+    os.makedirs(FRONTEND_PATH, exist_ok=True)
     
     # Load precomputed data on startup
     print("Loading precomputed backtest data...")
@@ -171,4 +202,4 @@ if __name__ == '__main__':
         print("⚠️ Warning: No precomputed data loaded")
     
     print("Starting Flask server on port 5001...")
-    app.run(debug=True, port=5001, use_reloader=False)
+    app.run(debug=True, port=5001, use_reloader=True)

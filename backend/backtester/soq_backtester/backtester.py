@@ -3,12 +3,15 @@ import numpy as np
 import vectorbt as vbt
 import tqdm
 from tabulate import tabulate
-import script as script
-import importlib
+import sys
 import os
-import json
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+import script
+import importlib
 importlib.reload(script)
+import scipy.stats as stats
+import json
 
 from script import Strategy 
 import plotly.io as pio
@@ -167,10 +170,41 @@ class Backtester:
         for ticker in tqdm.tqdm(tickers, desc="Exporting ticker charts"):
             ticker_data = self.get_candlestick_data(ticker)
             with open(os.path.join(charts_dir, f"{ticker}.json"), 'w') as f:
-                json.dump(ticker_data, f, default=str)
+                json.dump(self.clean_for_json(ticker_data), f, default=str)
+
+
+        # NEW: Generate returns histogram
+        returns_histogram = self.generate_returns_histogram(portfolio_summary['returns'])
+        with open(os.path.join(save_path, "returns_histogram.json"), 'w') as f:
+            json.dump(returns_histogram, f)
+        
+        # Also save as CSV
+        pd.DataFrame(returns_histogram).to_csv(os.path.join(save_path, "returns_histogram.csv"), index=False)
+        
+        # NEW: Generate performance metrics
+        performance_metrics = self.calculate_performance_metrics(portfolio, portfolio_summary)
+        safe_metrics = self.clean_for_json(performance_metrics)
+        with open(os.path.join(save_path, "performance_metrics.json"), 'w') as f:
+            json.dump(safe_metrics, f, indent=2, allow_nan=False)
+
 
         print(f"📁 Results exported to `{save_path}/`.")
         return portfolio_summary
+
+    def generate_returns_histogram(self, returns_series: pd.Series, bins: int = 30) -> list:
+        returns = returns_series.dropna()
+        counts, bin_edges = np.histogram(returns, bins=bins)
+
+        histogram = []
+        for i in range(len(counts)):
+            histogram.append({
+                "bin_start": round(float(bin_edges[i]), 6),
+                "bin_end": round(float(bin_edges[i + 1]), 6),
+                "frequency": int(counts[i])
+            })
+
+        return histogram
+
 
     def get_candlestick_data(self, ticker: str) -> dict:
         ohlcv = self.data[ticker][["open", "high", "low", "close"]].copy()
@@ -222,6 +256,129 @@ class Backtester:
             "data": data,
             "holdings": holdings
         }
+    
+    def calculate_performance_metrics(self, portfolio, portfolio_summary):
+        # Get portfolio statistics
+        stats_df = portfolio.stats().to_frame(name='Value').reset_index()
+        stats_df.columns = ['Metric', 'Value']
+        
+        # Convert stats to a dictionary for easier access
+        stats_dict = dict(zip(stats_df['Metric'], stats_df['Value']))
+        
+        # Extract key metrics from portfolio stats
+        metrics = {
+            'initial_value': portfolio.init_cash,
+            'final_value': portfolio.value().iloc[-1],
+            'total_return_pct': portfolio.total_return() * 100,
+            'cagr': portfolio.annualized_return() * 100,
+            'volatility_pct': portfolio.annualized_volatility() * 100,
+            'sharpe_ratio': portfolio.sharpe_ratio(),
+            'sortino_ratio': portfolio.sortino_ratio(),
+            'max_drawdown_pct': portfolio.max_drawdown() * 100,
+            'calmar_ratio': portfolio.calmar_ratio(),
+            'total_trades': stats_dict.get('Total Trades', 0),
+            'win_rate_pct': stats_dict.get('Win Rate [%]', 0),
+            'profit_factor': stats_dict.get('Profit Factor', 0)
+        }
+        
+        # Additional metrics from returns
+        returns = portfolio_summary['returns'].dropna()
+        if len(returns) > 0:
+            metrics['skewness'] = stats.skew(returns)
+            metrics['kurtosis'] = stats.kurtosis(returns, fisher=False)
+            metrics['var_95'] = np.percentile(returns, 5) * 100
+            cvar_95 = returns[returns <= np.percentile(returns, 5)].mean()
+            metrics['cvar_95'] = cvar_95 * 100 if not pd.isna(cvar_95) else 0
+        else:
+            metrics['skewness'] = 0
+            metrics['kurtosis'] = 0
+            metrics['var_95'] = 0
+            metrics['cvar_95'] = 0
+
+        # Format metrics for frontend
+        formatted_metrics = [
+            {
+                "metric": "Total Return",
+                "value": f"{metrics['total_return_pct']:.2f}%",
+                "description": "Total return over the period"
+            },
+            {
+                "metric": "CAGR",
+                "value": f"{metrics['cagr']:.2f}%",
+                "description": "Compound Annual Growth Rate"
+            },
+            {
+                "metric": "Volatility",
+                "value": f"{metrics['volatility_pct']:.2f}%",
+                "description": "Annualized standard deviation of returns"
+            },
+            {
+                "metric": "Sharpe Ratio",
+                "value": f"{metrics['sharpe_ratio']:.2f}",
+                "description": "Risk-adjusted return (risk-free rate=0)"
+            },
+            {
+                "metric": "Sortino Ratio",
+                "value": f"{metrics['sortino_ratio']:.2f}",
+                "description": "Adjusted for downside volatility"
+            },
+            {
+                "metric": "Max Drawdown",
+                "value": f"{metrics['max_drawdown_pct']:.2f}%",
+                "description": "Maximum peak-to-trough decline"
+            },
+            {
+                "metric": "Calmar Ratio",
+                "value": f"{metrics['calmar_ratio']:.2f}",
+                "description": "CAGR divided by max drawdown"
+            },
+            {
+                "metric": "Win Rate",
+                "value": f"{metrics['win_rate_pct']:.2f}%",
+                "description": "Percentage of profitable trades"
+            },
+            {
+                "metric": "Profit Factor",
+                "value": f"{metrics['profit_factor']:.2f}",
+                "description": "Gross profit divided by gross loss"
+            },
+            {
+                "metric": "Total Trades",
+                "value": f"{int(metrics['total_trades'])}",
+                "description": "Number of completed trades"
+            },
+            {
+                "metric": "Skewness",
+                "value": f"{metrics['skewness']:.2f}",
+                "description": "Measure of return distribution asymmetry"
+            },
+            {
+                "metric": "Kurtosis",
+                "value": f"{metrics['kurtosis']:.2f}",
+                "description": "Measure of tail risk in return distribution"
+            },
+            {
+                "metric": "VaR (95%)",
+                "value": f"{metrics['var_95']:.2f}%",
+                "description": "Worst expected loss at 95% confidence"
+            },
+            {
+                "metric": "CVaR (95%)",
+                "value": f"{metrics['cvar_95']:.2f}%",
+                "description": "Average loss beyond VaR at 95% confidence"
+            }
+        ]
+        
+        return formatted_metrics
+
+    def clean_for_json(self, obj):
+        if isinstance(obj, float) and (np.isnan(obj) or np.isinf(obj)):
+            return None
+        if isinstance(obj, dict):
+            return {k: self.clean_for_json(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [self.clean_for_json(v) for v in obj]
+        return obj
 
 
 # ... (keep all imports and class definition the same) ...
@@ -231,7 +388,7 @@ if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Construct the path to the data file
-    data_path = os.path.join(script_dir, 'data', 'multi_level_ohlcv.csv')
+    data_path = os.path.join(script_dir,  "..", "..", 'data', 'multi_level_ohlcv.csv')
     
     # Verify the file exists
     if not os.path.exists(data_path):

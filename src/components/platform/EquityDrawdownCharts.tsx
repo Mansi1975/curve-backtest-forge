@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
+import { parse } from 'date-fns';
 import {
   AreaChart,
   Area,
@@ -40,15 +41,32 @@ const EquityDrawdownCharts = () => {
         }
         
         const data = await response.json();
+        console.log('Fetched portfolio data:', data);
+
         
         // Format dates and convert numbers
+        // const formattedData = data.map((item: any) => {
+        //   const parsedDate = parse(item.date, 'yyyy-MM-dd HH:mm:ss', new Date());
+
+        //   return {
+        //     ...item,
+        //     date: format(parsedDate, 'MMM dd, yyyy'),
+        //     equity: parseFloat(item.equity),
+        //     drawdown: parseFloat(item.drawdown) * 100,
+        //     returns: parseFloat(item.returns) * 100
+        //   };
+        // });
         const formattedData = data.map((item: any) => ({
-          ...item,
-          date: format(new Date(item.date), 'MMM dd, yyyy'),
-          equity: parseFloat(item.equity),
-          drawdown: parseFloat(item.drawdown) * 100, // Convert to percentage
-          returns: parseFloat(item.returns) * 100    // Convert to percentage
-        }));
+            ...item,
+            date: new Date(item.date), // Keep as actual Date object
+            equity: parseFloat(item.equity),
+            drawdown: parseFloat(item.drawdown) * 100,
+            returns: parseFloat(item.returns) * 100
+          })).sort((a, b) => a.date.getTime() - b.date.getTime()); // Ensure chronological order
+
+
+        console.log('Formatted data:', formattedData);
+
         
         setPortfolioData(formattedData);
       } catch (err) {
@@ -67,7 +85,8 @@ const EquityDrawdownCharts = () => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-gray-900 border border-gray-700 p-4 rounded-lg shadow-lg">
-          <p className="text-sm text-gray-300 mb-2">{label}</p>
+          <p className="text-sm text-gray-300 mb-2">{format(new Date(label), 'MMM yyyy')}</p>
+
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: <span className="font-semibold">{entry.name.includes('drawdown') ? `${entry.value.toFixed(2)}%` : `$${entry.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}</span>
@@ -132,13 +151,15 @@ const EquityDrawdownCharts = () => {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis 
-              dataKey="date" 
-              stroke="#9ca3af" 
-              tick={{ fontSize: 12 }}
-              tickCount={5}
-              minTickGap={20}
+            <XAxis
+              dataKey="date"
+              stroke="#9ca3af"
+              tickFormatter={(value) => format(new Date(value), 'yyyy')}  // Show only year
+              interval="preserveStartEnd"
+              minTickGap={50}
             />
+
+
             <YAxis 
               stroke="#9ca3af" 
               tick={{ fontSize: 12 }}
@@ -172,13 +193,15 @@ const EquityDrawdownCharts = () => {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis 
-              dataKey="date" 
-              stroke="#9ca3af" 
-              tick={{ fontSize: 12 }}
-              tickCount={5}
-              minTickGap={20}
+            <XAxis
+              dataKey="date"
+              stroke="#9ca3af"
+              tickFormatter={(value) => format(new Date(value), 'yyyy')}  // Show only year
+              interval="preserveStartEnd"
+              minTickGap={50}
             />
+
+
             <YAxis 
               stroke="#9ca3af" 
               tick={{ fontSize: 12 }}
